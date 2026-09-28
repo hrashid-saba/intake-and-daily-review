@@ -1,0 +1,3693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Advisor Intake & Daily Report Log Lite — v1.2</title>
+<style>
+:root{
+  --brand:#326295;
+  --brand-strong:#244f7c;
+  --brand-soft:#eaf2fb;
+  --bg:#f4f7fb;
+  --panel:#ffffff;
+  --panel-soft:#f8fbff;
+  --text:#13253c;
+  --muted:#66788d;
+  --border:#d7e0ea;
+  --shadow:0 8px 28px rgba(28,57,90,.08);
+  --green:#2ab667;
+  --green-soft:#eaf8f0;
+  --yellow:#e0a621;
+  --yellow-soft:#fff7df;
+  --red:#dc4654;
+  --red-soft:#fff0f2;
+  --gray:#86919d;
+  --gray-soft:#f0f2f4;
+  --radius:16px;
+}
+body.dark{
+  --bg:#101821;
+  --panel:#18232f;
+  --panel-soft:#1e2b39;
+  --text:#eef4fa;
+  --muted:#9eafc1;
+  --border:#314254;
+  --shadow:none;
+  --brand-soft:rgba(80,120,170,.16);
+  --green-soft:rgba(42,182,103,.14);
+  --yellow-soft:rgba(224,166,33,.14);
+  --red-soft:rgba(220,70,84,.14);
+  --gray-soft:rgba(134,145,157,.14);
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+  font-synthesis:none;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.topbar{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:13px 20px;background:var(--panel);border-bottom:1px solid var(--border)
+}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:var(--brand);display:grid;place-items:center;color:#fff;font-weight:850}
+.brand h1{font-size:19px;margin:0;line-height:1.1}
+.brand p{font-size:12px;color:var(--muted);margin:3px 0 0}
+.school-tag{font-size:11px;font-weight:800;color:var(--brand);background:var(--brand-soft);border-radius:999px;padding:4px 8px;margin-left:3px}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.btn{
+  border:1px solid var(--border);background:var(--panel);color:var(--text);
+  padding:9px 12px;border-radius:10px;font-weight:700
+}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.layout{
+  max-width:1560px;margin:0 auto;padding:16px;
+  display:grid;grid-template-columns:minmax(430px,.92fr) minmax(520px,1.08fr);gap:16px
+}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-head h2{margin:0;font-size:18px}
+.card-head p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+
+
+.intake-form-title{
+  margin:0 0 3px;
+  font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:18px !important;
+  line-height:1.15;
+  letter-spacing:-0.015em;
+  font-weight:700 !important;
+  color:var(--text);
+}
+.country-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 8px;
+  margin:0 6px 6px 0;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--panel-soft);
+  font-size:11px;
+  font-weight:650;
+}
+.country-chip button{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  padding:0;
+  font-size:13px;
+}
+
+.header-controls{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.quick-priority{
+  display:flex;
+  align-items:flex-end;
+  gap:6px;
+  padding:5px 6px;
+  border:1px solid color-mix(in srgb,var(--brand) 28%, var(--border));
+  border-radius:10px;
+  background:color-mix(in srgb,var(--brand-soft) 82%, var(--panel));
+}
+.quick-field{
+  min-width:118px;
+}
+.quick-field label{
+  display:block;
+  margin:0 0 3px;
+  font-size:10px;
+  line-height:1;
+  font-weight:800;
+  color:var(--brand);
+}
+.quick-field select{
+  height:32px;
+  padding:5px 28px 5px 8px;
+  font-size:11px;
+  border-radius:8px;
+  background:var(--panel);
+}
+
+.mode-switch{display:flex;gap:5px;background:var(--brand-soft);padding:4px;border-radius:10px}
+.mode-switch button{border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:800;padding:7px 9px;border-radius:8px}
+.mode-switch button.active{background:var(--panel);color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.body{padding:17px 18px}
+.grid{display:grid;gap:12px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.academic{grid-template-columns:2fr .55fr .78fr .7fr}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.field label{
+  display:block;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:0;
+  color:var(--text);
+  margin:0 0 6px;
+}
+.field.center-label label{text-align:center}
+input,select,textarea{
+  width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:10px;
+  background:var(--panel);color:var(--text);outline:none
+}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 14%, transparent)}
+textarea{resize:vertical}
+.section-label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--brand);
+  font-weight:750;
+  margin:17px 0 9px;
+}
+.experience{min-height:54px}
+.notes{min-height:74px}
+
+.priority-field{
+  background:color-mix(in srgb,var(--brand-soft) 82%, var(--panel));
+  border:1px solid color-mix(in srgb,var(--brand) 28%, var(--border));
+  border-radius:10px;
+  padding:7px 8px 8px;
+}
+.priority-field label{
+  color:var(--brand);
+  font-weight:800;
+}
+.priority-field select{
+  background:var(--panel);
+}
+.prereq-col{
+  display:grid;
+  gap:7px;
+  align-content:start;
+}
+#statusGreenLabel[readonly],
+#statusYellowLabel[readonly],
+#statusRedLabel[readonly],
+#statusGrayLabel[readonly]{
+  background:var(--panel-soft);
+  color:var(--muted);
+  cursor:not-allowed;
+}
+
+.prereq-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;
+  padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel-soft)
+}
+.prereq-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text)}
+.prereq-item input{width:auto}
+.prereq-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.prereq-tools button{border:0;background:transparent;color:var(--brand);font-size:11px;font-weight:800;padding:0}
+.form-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px}
+.checkbox{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.checkbox input{width:auto}
+.stack{display:grid;gap:16px}
+.activity-list{display:grid;max-height:310px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.activity{
+  padding:12px 15px;border-bottom:1px solid var(--border);display:grid;
+  grid-template-columns:auto 1fr auto;gap:10px;align-items:center;cursor:pointer
+}
+.activity:last-child{border-bottom:0}
+.activity:hover{background:var(--panel-soft)}
+.activity strong{font-size:13px}
+.sub{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{text-align:right;font-size:11px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%}
+.green{background:var(--green)} .yellow{background:var(--yellow)} .red{background:var(--red)} .gray{background:var(--gray)}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:800;margin-top:4px}
+.badge-green{background:var(--green-soft);color:var(--green)}
+.badge-yellow{background:var(--yellow-soft);color:#a87500}
+.badge-red{background:var(--red-soft);color:var(--red)}
+.badge-gray{background:var(--gray-soft);color:var(--gray)}
+.empty{padding:26px;text-align:center;color:var(--muted);font-size:13px}
+.report-wrap{padding:16px 18px}
+.report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.report-head h3{margin:0;font-size:18px}
+.report-head p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.report{border:1px solid color-mix(in srgb,var(--brand) 24%, var(--border));background:var(--brand-soft);border-radius:12px;padding:16px;font-size:12px;line-height:1.48}
+.report h4{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--brand);margin:0 0 7px}
+.metrics{display:grid;gap:3px;margin-bottom:13px}
+.case{padding:8px 0;border-bottom:1px solid var(--border)}
+.case:last-of-type{border-bottom:0}
+.identity{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:3px}
+.identity .name{font-weight:800}
+.identity .source{font-weight:650}
+.case p{margin:0}.sql-marker{font-size:10px;font-weight:800;color:var(--brand)}
+.legend{display:flex;gap:11px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.modal{display:none;position:fixed;inset:0;background:rgba(8,15,24,.48);z-index:50;place-items:center;padding:18px}
+.modal.show{display:grid}
+.modal-box{width:min(620px,100%);max-height:calc(100vh - 32px);overflow:hidden;background:var(--panel);border-radius:16px;border:1px solid var(--border);box-shadow:0 25px 80px rgba(0,0,0,.25)}
+.modal-head{padding:15px 17px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:14px 16px;max-height:calc(100vh - 96px);overflow-y:auto}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.theme-card{border:1px solid var(--border);border-radius:10px;padding:5px;cursor:pointer}
+.theme-card.active{outline:2px solid var(--brand)}
+.swatch{height:38px;border-radius:7px;margin:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;letter-spacing:.02em}
+.small-note{font-size:11px;color:var(--muted)}
+.toast{position:fixed;right:16px;bottom:16px;background:var(--text);color:var(--panel);padding:10px 12px;border-radius:9px;opacity:0;transform:translateY(8px);transition:.2s;z-index:80;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+
+
+select:disabled{
+  background:color-mix(in srgb,var(--panel-soft) 88%, var(--border));
+  color:var(--muted);
+  cursor:not-allowed;
+  opacity:.82
+}
+
+.combo{position:relative}
+.combo input{padding-right:34px}
+.combo-toggle{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  border:0;background:transparent;color:var(--muted);padding:4px 5px;font-size:14px;line-height:1
+}
+.combo-menu{
+  display:none;position:absolute;z-index:60;left:0;right:0;top:calc(100% + 5px);
+  max-height:210px;overflow:auto;background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;box-shadow:0 12px 34px rgba(0,0,0,.16);padding:5px
+}
+.combo.open .combo-menu{display:block}
+.combo-option{
+  padding:8px 9px;border-radius:7px;font-size:12px;cursor:pointer;color:var(--text)
+}
+.combo-option:hover,.combo-option.active{background:var(--brand-soft);color:var(--brand);font-weight:700}
+.combo-empty{padding:8px 9px;color:var(--muted);font-size:12px}
+
+@media(max-width:1050px){.layout{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .top-four,.second-line{grid-template-columns:1fr !important;max-width:none !important}
+  .layout{padding:10px}.card-head,.body,.report-wrap{padding:14px}
+  .g3,.academic,.g2,.prereq-grid{grid-template-columns:1fr}
+  .form-footer{flex-direction:column;align-items:flex-start}
+  .topbar{align-items:flex-start}
+  .actions{gap:6px}
+}
+@media(max-width:540px){
+  .brand p,.school-tag{display:none}
+  .mode-switch{width:100%}
+  .mode-switch button{flex:1}
+  .header-controls{width:100%;justify-content:flex-start}
+  .quick-priority{width:100%}
+  .quick-field{flex:1;min-width:0}
+  .card-head{align-items:flex-start;flex-direction:column}
+}
+
+/* Compact follow-up task generator */
+.report{max-height:300px;overflow:auto}
+.task-builder{border-top:1px solid var(--border);margin-top:12px;padding-top:12px}
+.task-builder-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:9px}
+.task-builder-head h4{margin:0;font-size:13px;color:var(--brand);text-transform:uppercase;letter-spacing:.045em}
+.task-builder-head p{margin:3px 0 0;font-size:11px;color:var(--muted)}
+.task-grid{display:grid;grid-template-columns:.48fr .62fr 1.9fr;gap:8px;align-items:end}
+.task-grid .field label{font-size:10px;margin-bottom:4px}
+.task-grid input,.task-grid select{height:34px;padding:6px 9px;font-size:11px}
+.task-output-row{display:flex;gap:7px;margin-top:8px}
+.task-output-row input{height:35px;font-size:11px;font-weight:650;background:var(--panel-soft)}
+.task-output-row .btn{white-space:nowrap}
+.task-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+.setting-check{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:650}
+.setting-check input{width:auto}
+.format-preview{padding:9px 10px;border:1px dashed var(--border);border-radius:9px;background:var(--panel-soft);font-size:12px;font-weight:650;margin-top:8px}
+@media(max-width:760px){.task-grid,.task-settings-grid{grid-template-columns:1fr}.task-output-row{flex-direction:column}}
+
+.task-hidden{display:none !important}
+.status-details{margin-top:14px;border-top:1px solid var(--border);padding-top:10px}
+.status-details summary{cursor:pointer;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.045em;color:var(--brand);list-style:none}
+.status-details summary::-webkit-details-marker{display:none}
+.status-details summary::after{content:"＋";float:right;font-size:14px}
+.status-details[open] summary::after{content:"−"}
+.status-lock-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0}
+.status-lock-row .small-note{margin:0}
+.theme-card .small-note,.theme-card>strong{display:none}
+
+.advisor-pill{flex:0 0 auto;min-width:64px;max-width:118px;height:38px;padding:0 12px;border-radius:11px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.advisor-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand-copy{min-width:0}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:700px){.advisor-pill{min-width:58px;max-width:92px;height:36px;padding:0 9px;border-radius:10px;font-size:11px}.brand-copy h1{line-height:1.08}}
+
+
+.quick-save-btn{align-self:center;min-width:72px;height:36px;padding:7px 13px;flex:0 0 auto}
+@media(max-width:900px){
+  .quick-save-btn{order:4;width:100%;height:38px}
+  .activity-list{max-height:260px}
+}
+/* v25 workflow refinements */
+.stack{display:flex;flex-direction:column;align-items:stretch;min-width:0}
+.activity-list{display:block;max-height:270px;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.interaction-flags{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.interaction-flags .checkbox{font-size:11px;white-space:nowrap}
+.save-feedback{font-size:11px;font-weight:700;max-width:240px;line-height:1.25}
+.save-feedback.dirty{color:var(--yellow)}.save-feedback.error{color:var(--red)}.save-feedback.saved{color:var(--green)}
+.prereq-choices{display:flex;gap:10px;flex-wrap:wrap;padding:5px 0 9px}
+.prereq-choices .checkbox{font-size:11px}
+.prereq-grid[hidden],#pdcReportNote[hidden]{display:none!important}
+.prereq-grid{margin-top:4px}
+.task-builder{padding-bottom:0}
+.task-builder>summary{cursor:pointer;list-style:none;align-items:center;margin-bottom:0}
+.task-builder>summary::-webkit-details-marker{display:none}
+.task-builder>summary strong{display:block;color:var(--brand);font-size:12px;text-transform:uppercase;letter-spacing:.035em}
+.task-builder>summary small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.task-builder>summary:after{content:'＋';margin-left:auto;color:var(--brand);font-size:17px}
+.task-builder[open]>summary:after{content:'−'}
+.task-builder[open]>summary{margin-bottom:10px}
+@media(max-width:900px){.activity-list{max-height:235px}.save-feedback{max-width:100%}}
+/* Priority 1: efficient three-depth capture, stable two-column work area */
+.layout{align-items:start}
+.layout>.card,.layout>.stack{min-width:0;align-self:start}
+.stack{min-width:0}
+.activity-list{display:block;min-height:0;height:auto;max-height:290px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.activity-list .activity{min-width:0}
+.activity-list .activity>div:nth-child(2){min-width:0}
+.capture-mode-bar{display:flex;flex-wrap:wrap;align-items:center;gap:9px 12px;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--panel-soft)}
+.capture-mode-label{font-size:11px;letter-spacing:.045em;font-weight:800;color:var(--muted);text-transform:uppercase}
+.capture-mode-switch{display:flex;gap:3px;padding:3px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+.capture-mode-switch button{border:0;border-radius:7px;background:transparent;color:var(--muted);padding:7px 10px;font-size:12px;font-weight:750}
+.capture-mode-switch button.active{background:var(--brand);color:white}
+.capture-mode-switch button:focus-visible,.report-preview>summary:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.capture-mode-help{font-size:11px;color:var(--muted);line-height:1.35}
+#academicContext[hidden],#programIntake[hidden],#conversationContext[hidden],#nextStepsField[hidden],[data-full-basics][hidden]{display:none!important}
+.report-preview{border-top:1px solid var(--border);padding-top:9px;margin-top:11px;min-width:0}
+.report-preview>summary{list-style:none;cursor:pointer;color:var(--brand);font-size:12px;font-weight:800;padding:4px 0;display:flex;align-items:center;justify-content:space-between}
+.report-preview>summary::-webkit-details-marker{display:none}
+.report-preview>summary:after{content:'＋';margin-left:8px;font-size:17px}
+.report-preview[open]>summary:after{content:'−'}
+.preview-summary-hint{font-size:11px;font-weight:500;color:var(--muted);margin-right:auto;margin-left:5px}
+.daily-glance{font-size:12px;line-height:1.5;background:var(--panel-soft);padding:10px 12px;border:1px solid var(--border);border-radius:10px}
+.daily-glance .glance-row+.glance-row{margin-top:3px}
+.report-preview .report{height:auto;max-height:340px;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;overflow-anchor:none;min-width:0}
+@media(max-width:760px){.capture-mode-bar{padding:10px 14px}.capture-mode-help{width:100%}.capture-mode-switch{max-width:100%}.capture-mode-switch button{padding:7px 8px}.activity-list{max-height:250px}}
+#interactionForm[data-depth=quick] .top-four{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+#interactionForm[data-depth=quick] #summary{min-height:45px!important;height:45px}
+#interactionForm[data-depth=quick] #saveBtn{display:none!important}
+#interactionForm[data-depth=quick] .form-footer{margin-top:12px}
+@media(max-width:760px){#interactionForm[data-depth=quick] .top-four{grid-template-columns:1fr!important}}
+
+/* v27 · Refined institutional themes — appearance only; no workflow changes */
+/* Stretch the dark surface to the bottom of the viewport when Quick Log is short. */
+html,body{min-height:100%}
+body{min-height:100vh}
+:root{
+  --brand-accent:#418FDE;
+  --brand-pale:#9BCBEB;
+  --brand-ink:#28547F;
+  --brand-border:#c2d1df;
+  --brand-glow:rgba(65,143,222,.09);
+  --bg:#F5F7F8;
+  --panel-soft:#F8FAFB;
+  --text:#212721;
+  --muted:#5C6A70;
+  --border:#DCE3E7;
+  --shadow:0 5px 20px rgba(27,41,52,.055);
+  --radius:14px;
+  color-scheme:light;
+}
+body.dark{
+  --bg:#151B1D;
+  --panel:#21292C;
+  --panel-soft:#263135;
+  --text:#F1F5F5;
+  --muted:#B2C0C4;
+  --border:#3D4C50;
+  --shadow:0 8px 24px rgba(0,0,0,.15);
+  color-scheme:dark;
+}
+/* A small identity cue, not a large colored header. */
+.topbar{position:sticky;isolation:isolate;border-bottom:1px solid var(--border);box-shadow:0 2px 12px rgba(26,41,48,.025)}
+.topbar::after{content:"";position:absolute;bottom:-1px;left:0;width:100%;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,var(--brand) 0%,var(--brand-accent) 26%,transparent 68%);opacity:.65}
+body.dark .topbar::after{opacity:.8}
+.advisor-pill,.btn.primary,.capture-mode-switch button.active{background:var(--brand);color:#fff}
+.btn.primary:hover,.capture-mode-switch button.active:hover{background:var(--brand-strong);border-color:var(--brand-strong)}
+.btn:focus-visible,.theme-card:focus-visible{outline:2px solid var(--brand-ink);outline-offset:2px}
+.school-tag{background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--brand-border);padding:3px 8px}
+.card{border-color:var(--border);box-shadow:var(--shadow)}
+.card-head{background:linear-gradient(115deg,var(--brand-glow),var(--panel) 58%)}
+.capture-mode-bar{background:color-mix(in srgb,var(--brand-soft) 24%,var(--panel));border-bottom-color:var(--brand-border)}
+.capture-mode-switch,.mode-switch{background:var(--brand-soft);border-color:var(--brand-border)}
+.mode-switch button.active{background:var(--panel);color:var(--brand-ink);box-shadow:0 1px 4px rgba(0,0,0,.055)}
+.capture-mode-switch button:focus-visible,.report-preview>summary:focus-visible{outline-color:var(--brand-ink)}
+.capture-mode-label,.capture-mode-help{color:var(--muted)}
+.section-label,.quick-field label,.priority-field label,.report h4,.report-preview>summary,.task-builder>summary strong,
+.status-details summary,.prereq-tools button,.sql-marker,.combo-option.active,.combo-option:hover{color:var(--brand-ink)}
+.quick-priority,.priority-field{
+  background:var(--brand-soft);
+  border-color:var(--brand-border);
+}
+.quick-priority select,.priority-field select{background:var(--panel)}
+input:focus,select:focus,textarea:focus{border-color:var(--brand-ink);box-shadow:0 0 0 3px var(--brand-glow)}
+input[type="checkbox"],input[type="radio"]{accent-color:var(--brand)}
+.report{background:color-mix(in srgb,var(--brand-soft) 66%,var(--panel));border-color:var(--brand-border)}
+.daily-glance{background:color-mix(in srgb,var(--brand-soft) 35%,var(--panel));border-color:var(--border)}
+.report-preview{border-top-color:var(--border)}
+.report-preview>summary:hover,.task-builder>summary:hover{color:var(--brand-ink)}
+.activity:hover{background:var(--brand-soft)}
+.theme-card{background:var(--panel);border-color:var(--border);transition:border-color .15s,box-shadow .15s}
+.theme-card.active{outline:1px solid var(--brand);box-shadow:0 0 0 2px var(--brand-soft);border-color:var(--brand)}
+.theme-card:hover{border-color:var(--brand-border)}
+.swatch{position:relative;overflow:hidden}
+.swatch::after{content:"";position:absolute;height:3px;bottom:0;left:0;right:0;background:rgba(255,255,255,.28)}
+.modal-head{background:linear-gradient(110deg,var(--brand-glow),var(--panel) 75%)}
+/* Status colors retain their own meaning independently of the school's palette. */
+body:not(.dark) .badge-green{color:#16633C}body:not(.dark) .badge-yellow{color:#825600}
+body:not(.dark) .badge-red{color:#A5283C}body:not(.dark) .badge-gray{color:#4F5964}
+body.dark .badge-green{color:#91E2B0}body.dark .badge-yellow{color:#FFD16E}
+body.dark .badge-red{color:#FF9BA5}body.dark .badge-gray{color:#D3DCE2}
+body.dark .btn.primary,body.dark .capture-mode-switch button.active{color:#fff}
+body.dark .school-tag{color:var(--brand-ink)}
+body.dark .mode-switch button.active{color:var(--brand-ink)}
+body.dark .report{background:color-mix(in srgb,var(--brand-soft) 75%,var(--panel))}
+body.dark .capture-mode-bar{background:color-mix(in srgb,var(--brand-soft) 35%,var(--panel))}
+/* Retain selected school's badge on compact layouts when it fits. */
+@media(max-width:700px){.school-tag{display:inline-flex;font-size:10px;padding:2px 6px;vertical-align:middle}}
+
+
+/* v28 — settings hierarchy and 100%-zoom usability. */
+.modal-box{display:flex;flex-direction:column;min-height:0;max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);width:min(630px,100%);border-radius:16px}
+.modal-head{flex:0 0 auto;min-height:70px;padding:13px 18px}
+.settings-heading{display:flex;flex-direction:column;gap:3px;min-width:0}
+.settings-heading strong{font-size:17px;line-height:1.15;letter-spacing:-.015em}
+.settings-heading span{font-size:12px;color:var(--muted)}
+.modal-body{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 19px 12px}
+.settings-footer{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 18px;background:var(--panel);border-top:1px solid var(--border)}
+.settings-storage-note{font-size:11.5px;line-height:1.4;color:var(--muted)}
+.settings-footer .btn{flex:0 0 auto;padding:10px 16px}
+.settings-section{padding:17px 0 18px}
+.settings-section+.settings-section{border-top:1px solid var(--border)}
+.settings-section-heading{margin-bottom:12px}
+.settings-section-heading h3{font-size:14px;line-height:1.3;font-weight:760;margin:0;color:var(--text);letter-spacing:-.005em}
+.settings-section-heading p{font-size:12px;line-height:1.45;color:var(--muted);margin:4px 0 0}
+.settings-section .field label,.settings-accordion .field label{font-size:12px;font-weight:700}
+.settings-subheading{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.055em;color:var(--brand-ink);margin:15px 0 8px}
+.country-heading{margin-top:16px}
+.settings-hint{font-size:12px;line-height:1.5;color:var(--muted);margin:0 0 10px}
+.settings-inline-field{display:flex;gap:8px;align-items:center}
+.settings-inline-field input{flex:1;min-width:0}
+#commonCountryList{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
+#commonCountryList .country-chip{margin:0 4px 4px 0}
+.settings-choice{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:10px;background:var(--panel-soft);border:1px solid var(--border);cursor:pointer}
+.settings-choice+.settings-choice{margin-top:8px}
+.settings-choice input{flex:0 0 auto;width:16px;height:16px;margin:2px 0 0}
+.settings-choice span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.settings-choice strong{font-size:12.5px;font-weight:730;line-height:1.4;color:var(--text)}
+.settings-choice small{font-size:11.5px;line-height:1.45;color:var(--muted)}
+.settings-checkbox-grid{gap:11px 13px}
+.settings-checkbox-grid .setting-check{font-size:12px;font-weight:620;line-height:1.4}
+.settings-checkbox-grid .setting-check input{margin:0;flex:0 0 auto;width:15px;height:15px}
+.settings-accordion{border-top:1px solid var(--border);margin:0;min-width:0}
+.settings-accordion>summary{display:flex;align-items:center;gap:12px;padding:16px 0;cursor:pointer;list-style:none;color:var(--text)}
+.settings-accordion>summary::-webkit-details-marker{display:none}
+.settings-accordion-title{display:flex;flex:1;flex-direction:column;gap:4px;font-size:13.5px;font-weight:780;line-height:1.3}
+.settings-accordion-title small{font-size:11.5px;line-height:1.4;color:var(--muted);font-weight:450}
+.settings-chevron{font-size:20px;color:var(--brand-ink);transform-origin:center;transition:transform .15s;line-height:1}
+.settings-accordion[open]>.settings-accordion-content{padding:0 0 18px}
+.settings-accordion[open]>summary .settings-chevron{transform:rotate(180deg)}
+.settings-task-inputs{margin:12px 0}
+.settings-example-label{color:var(--muted);font-weight:600}
+.settings-accordion .format-preview{margin-top:12px;margin-bottom:9px;overflow-wrap:anywhere;line-height:1.5}
+.settings-nested{margin-top:15px;border:1px solid var(--border);border-radius:10px;background:var(--panel-soft)}
+.settings-nested>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;padding:12px;font-size:12px;font-weight:750}
+.settings-nested>summary::-webkit-details-marker{display:none}
+.settings-nested>summary span{color:var(--brand-ink);font-size:16px}
+.settings-nested[open]>summary span{transform:rotate(180deg)}
+.settings-nested-body{padding:0 12px 12px}
+.settings-status .status-lock-row{margin:0 0 12px;align-items:flex-start}
+.settings-status .status-lock-row .settings-hint{flex:1;margin:0}
+.settings-status #toggleStatusLockBtn{font-size:11.5px;white-space:nowrap;padding:8px 9px;flex:0 0 auto}
+.settings-accordion input[readonly]{background:var(--panel-soft);color:var(--muted);cursor:default}
+.settings-accordion>summary:focus-visible,.settings-nested>summary:focus-visible,.theme-card:focus-visible{outline:2px solid var(--brand-ink);outline-offset:2px;border-radius:7px}
+@media(max-width:540px){
+  .modal{padding:8px}
+  .modal-box{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);width:100%}
+  .modal-head,.settings-footer{padding:10px 12px}
+  .modal-body{padding:0 12px 10px}
+  .settings-storage-note{font-size:10.5px}
+  .settings-status .status-lock-row{flex-direction:column}
+  .settings-checkbox-grid{grid-template-columns:1fr 1fr}
+  .settings-section{padding:14px 0 15px}
+}
+@media(max-width:360px){.settings-checkbox-grid{grid-template-columns:1fr}}
+
+/* v29 · Compact interaction workspace and single-action form */
+:root{--topbar-height:66px}
+.actions{flex:1;justify-content:flex-end}
+.actions .action-spacer{flex:1;min-width:4px}
+.actions .export-link{font-size:12px;font-weight:650;color:var(--muted);padding:8px 10px}
+body.focus-mode .layout{grid-template-columns:minmax(0,940px);justify-content:center}
+body.focus-mode .layout>.stack{display:none!important}
+body.focus-mode .layout>.intake-card{width:100%}
+body.focus-mode #focusBtn{border-color:var(--brand);color:var(--brand-ink);background:var(--brand-soft)}
+.intake-card{overflow:visible;min-width:0;isolation:isolate}
+.intake-card .intake-head{position:sticky;top:var(--topbar-height);z-index:15;background:var(--panel);border-radius:var(--radius) var(--radius) 0 0;display:block;padding:11px 16px 12px}
+.intake-headline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.intake-title{min-width:0}
+.intake-title h2{font-size:16px;line-height:1.18;white-space:normal;margin:0}
+.intake-title p{margin:3px 0 0}
+.save-group{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.save-group .save-feedback{font-size:10px;max-width:190px;text-align:right}
+.save-group .quick-save-btn{min-width:82px;min-height:37px;display:inline-flex;justify-content:center;align-items:center;line-height:1.1;padding:8px 12px;white-space:nowrap;order:0;width:auto}
+.intake-head-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(178px,218px);align-items:stretch;gap:12px}
+.interaction-setup{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:8px;min-width:0}
+.interaction-flags{gap:6px 12px;width:100%;min-height:24px}
+.interaction-flags .checkbox{font-size:11px}
+.interaction-setup .mode-switch{max-width:100%;display:flex;justify-content:flex-start}
+.mode-switch button{white-space:nowrap}
+.mode-switch button:disabled{opacity:.40;cursor:not-allowed}
+.intake-head-grid .quick-priority{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:8px 10px}
+.intake-head-grid .quick-field{width:100%;min-width:0}
+.intake-head-grid .quick-field select{height:34px;font-size:12px;padding:6px 23px 6px 9px;max-width:100%;color:var(--text)}
+.intake-head-grid .quick-field label{margin-bottom:4px;line-height:1.1}
+.intake-head-grid .quick-field select:disabled{opacity:0.76}
+.intake-card .capture-mode-bar{min-height:50px;gap:6px 10px}
+.intake-card #academicContext,.intake-card #conversationContext{min-width:0}
+.summary-label-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
+.summary-label-row>label:first-child{margin:0}
+.summary-label-row .profile-toggle{color:var(--brand-ink);font-size:11px;font-weight:650}
+.profile-summary-panel{margin:0 0 10px;padding:9px;border:1px solid var(--brand-border);background:var(--brand-soft);border-radius:11px}
+.profile-toggle[hidden],.profile-summary-panel[hidden],#navDialog[hidden],#restoreDraftBtn[hidden]{display:none!important}
+.profile-summary-head{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+.profile-summary-head>label{margin:0;font-size:11px;color:var(--brand-ink)}
+.profile-refresh{font-size:10px;padding:5px 8px;font-weight:650}
+#generatedProfile{min-height:58px;max-height:170px;font-size:12px;line-height:1.45;resize:vertical;background:var(--panel)}
+#profileSummaryHint{font-size:10px;color:var(--muted);display:block;margin-top:6px}
+.form-footer{gap:12px;align-items:center;min-width:0}
+.form-secondary-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+.form-secondary-actions .btn{font-size:12px;padding:8px 10px}
+.recent-nav{display:flex;justify-content:flex-end;align-items:center;gap:7px;border-top:1px solid var(--border);margin-top:15px;padding-top:10px;min-height:40px}
+.recent-nav #recentNavLabel{font-size:11px;color:var(--muted);min-width:0}
+.recent-nav .nav-small{width:29px;height:29px;border-radius:8px;padding:0;font-size:20px;line-height:1;display:grid;place-items:center;color:var(--brand-ink)}
+.recent-nav .nav-small:disabled{opacity:.3;cursor:default}
+.recent-nav .restore-draft{font-size:10px;padding:6px 9px}
+.nav-dialog-shade{position:fixed;inset:0;background:rgba(9,20,34,.54);display:grid;place-items:center;z-index:100;padding:18px}
+.nav-dialog{max-width:440px;width:100%;background:var(--panel);padding:20px;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+.nav-dialog h3{margin:0 0 7px;font-size:18px}
+.nav-dialog p{margin:0 0 15px;color:var(--muted);line-height:1.4;font-size:13px}
+.nav-dialog-actions{display:flex;flex-wrap:wrap;gap:8px}
+.nav-dialog-actions .btn{font-size:12px;padding:8px 10px}
+@media(max-width:940px){.intake-head-grid{grid-template-columns:minmax(0,1fr) minmax(165px,205px)}.mode-switch button{padding:7px 8px;font-size:11px}.save-group .save-feedback{max-width:125px}}
+@media(max-width:760px){.topbar{padding:10px 12px;flex-wrap:wrap}.actions{flex:1 1 100%;justify-content:flex-end}.actions .action-spacer{min-width:0}.intake-card .intake-head{padding:10px 12px}.intake-head-grid{grid-template-columns:minmax(0,1fr) minmax(140px,185px)}.intake-title p{display:none}.interaction-flags{gap:5px 8px}.interaction-flags .checkbox{font-size:10px}.mode-switch button{padding:6px;font-size:10px}.save-group .save-feedback{max-width:115px}}
+@media(max-width:550px){.intake-head-grid{grid-template-columns:1fr}.intake-headline{margin-bottom:7px}.intake-head-grid .quick-priority{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;gap:7px}.intake-card .intake-head{position:sticky;top:var(--topbar-height)}.intake-head-grid .quick-priority{padding:6px}.mode-switch{width:auto;max-width:100%}.mode-switch button{flex:initial}.save-group .save-feedback{max-width:90px;font-size:9px}.save-group .quick-save-btn{min-width:65px}.form-footer{flex-direction:row;flex-wrap:wrap}.recent-nav{justify-content:flex-start}}
+
+
+/* v30 — compact interaction header; capture level shares the space beside Outcome / Status. */
+.intake-head-grid{align-items:start;gap:10px}
+.interaction-setup{justify-content:flex-start;gap:6px;min-width:0}
+.interaction-setup .capture-mode-bar{
+  display:flex;align-items:center;justify-content:flex-start;gap:7px;
+  border:0;border-radius:0;background:transparent;padding:0;margin:0;
+  min-height:0;width:100%;flex-wrap:nowrap;
+}
+.interaction-setup .capture-mode-label{
+  flex:0 0 auto;white-space:nowrap;font-size:10px;
+  font-weight:750;color:var(--muted);
+}
+.interaction-setup .capture-mode-switch{
+  flex:0 1 auto;min-width:0;max-width:100%;white-space:nowrap;
+}
+.interaction-setup .capture-mode-switch button{
+  padding:6px 8px;font-size:11px;white-space:nowrap;
+}
+.interaction-setup>.capture-mode-help{
+  display:block;min-width:0;font-size:10px;line-height:1.2;margin-top:-2px;
+}
+.intake-head-grid .quick-priority{align-self:start}
+@media(max-width:760px){
+  .interaction-setup{gap:5px}
+  .interaction-setup .capture-mode-bar{gap:6px;padding:0;min-height:0}
+  .interaction-setup .capture-mode-switch button{padding:6px 7px;font-size:10px}
+  .interaction-setup>.capture-mode-help{font-size:10px;width:auto}
+}
+@media(max-width:550px){
+  .intake-head-grid{gap:8px}
+  .interaction-setup .capture-mode-bar{flex-wrap:wrap}
+  .interaction-setup .capture-mode-switch{max-width:100%}
+}
+
+
+/* v31 — independent repeatable academic history and MCAT attempts */
+.interaction-setup .capture-mode-bar{margin-left:0;padding-left:0;gap:0}
+.academic-multi-layout{display:grid;grid-template-columns:minmax(0,3.5fr) minmax(118px,1fr);gap:12px;align-items:start}
+.academic-history-group,.mcat-history-group,.academic-repeat-list,.mcat-repeat-list{min-width:0}
+.academic-repeat-list,.mcat-repeat-list{display:flex;flex-direction:column;gap:11px}
+.academic-repeat-row,.mcat-repeat-row{min-width:0;position:relative}
+.academic-row-fields{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,.85fr) minmax(0,.56fr);gap:9px}
+.academic-row-fields .field,.mcat-repeat-row .field{min-width:0}
+.academic-row-fields label,.mcat-repeat-row label{white-space:nowrap}
+.academic-extra-header{display:flex;justify-content:space-between;align-items:center;gap:7px;margin:0 0 5px;color:var(--muted);font-size:10px;font-weight:750}
+.academic-repeat-row.is-extra,.mcat-repeat-row.is-extra{padding-top:8px;border-top:1px solid var(--border)}
+.entry-remove{flex-shrink:0;border:0;background:transparent;color:var(--muted);padding:3px 6px;border-radius:6px;font-size:11px;font-weight:700}
+.entry-remove:hover,.entry-remove:focus-visible{background:var(--brand-soft);color:var(--brand-ink)}
+.add-entry-btn{font:inherit;background:transparent;border:1px dashed var(--brand-border);border-radius:8px;color:var(--brand-ink);font-size:11px;font-weight:750;margin-top:9px;padding:6px 9px;max-width:100%;text-align:left}
+.add-entry-btn:hover,.add-entry-btn:focus-visible{background:var(--brand-soft);border-style:solid}
+.add-entry-btn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:760px){.academic-multi-layout{grid-template-columns:minmax(0,1fr)}.academic-row-fields{grid-template-columns:minmax(0,1.7fr) minmax(0,.85fr) minmax(0,.6fr)}}
+@media(max-width:440px){.academic-row-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.academic-row-fields>.field:first-child{grid-column:1/-1}}
+
+
+/* v32 — flat, speed-first visual system. Business rules and persisted data unchanged. */
+:root{
+  --flat-accent:#861F41;
+  --flat-accent-hover:#6D1935;
+  --flat-canvas:#F5F6F7;
+  --flat-card:#FFFFFF;
+  --flat-soft:#F8F9FA;
+  --flat-line:#D6DADF;
+  --flat-ink:#20252B;
+  --flat-muted:#626A73;
+  --flat-strong:#3F4851;
+  --brand:#326295;
+  --brand-strong:#254D76;
+  --brand-accent:#418FDE;
+  --brand-ink:#28547F;
+  --brand-border:#C2D1DF;
+  --brand-soft:#EEF5FB;
+  --brand-glow:transparent;
+  --bg:var(--flat-canvas)!important;
+  --panel:var(--flat-card)!important;
+  --panel-soft:var(--flat-soft)!important;
+  --text:var(--flat-ink)!important;
+  --muted:var(--flat-muted)!important;
+  --border:var(--flat-line)!important;
+  --shadow:none!important;
+  --radius:12px!important;
+  color-scheme:light;
+}
+body.dark{
+  --flat-canvas:#171A1E;
+  --flat-card:#202429;
+  --flat-soft:#262B31;
+  --flat-line:#434A52;
+  --flat-ink:#F3F4F6;
+  --flat-muted:#BCC3CD;
+  --flat-strong:#D2D7DD;
+  --brand:inherit;
+  --brand-strong:inherit;
+  --brand-accent:inherit;
+  --brand-ink:inherit;
+  --brand-border:inherit;
+  --brand-soft:inherit;
+  --bg:var(--flat-canvas)!important;
+  --panel:var(--flat-card)!important;
+  --panel-soft:var(--flat-soft)!important;
+  --text:var(--flat-ink)!important;
+  --muted:var(--flat-muted)!important;
+  --border:var(--flat-line)!important;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-shadow:none!important;text-shadow:none!important;background-image:none!important}
+html{scrollbar-gutter:stable}
+body{font-size:13px;line-height:1.5;font-weight:400}
+.topbar{background:var(--panel);border-bottom:1px solid var(--border);padding:12px 18px}
+.topbar::after{display:none!important}
+.brand h1{font-size:18px;line-height:1.23;letter-spacing:-.018em;font-weight:750}
+.brand p{font-size:12px;line-height:1.4}
+.advisor-pill{background:var(--brand);border-radius:8px;min-width:64px;font-weight:750}
+.school-tag{background:var(--panel-soft);color:var(--text);border:1px solid var(--border);border-radius:7px;font-weight:700}
+.layout{gap:16px;padding:18px;align-items:start}
+.card{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--panel)}
+.intake-card{overflow:visible!important}
+.card-head{background:var(--panel);padding:15px 16px;border-bottom:1px solid var(--border)}
+.card-head h2,.report-head h3{font-size:17px;line-height:1.26;color:var(--text);font-weight:750;letter-spacing:-.012em}
+.card-head p,.report-head p{font-size:12px;line-height:1.5}
+.btn,.mode-switch button,.capture-mode-switch button,
+input,select,textarea,.combo-option,.theme-card,.settings-choice,
+.country-chip,.quick-priority,.profile-summary-panel,.add-entry-btn{border-radius:8px}
+.btn{font-size:12px;font-weight:650;line-height:1.25;min-height:36px;padding:8px 12px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.btn:hover{background:var(--panel-soft);border-color:var(--flat-strong)}
+.btn.primary,.capture-mode-switch button.active,.mode-switch button.active{background:var(--brand)!important;border-color:var(--brand)!important;color:#FFF!important}
+.btn.primary:hover,.capture-mode-switch button.active:hover,.mode-switch button.active:hover{background:var(--brand-strong)!important;border-color:var(--brand-strong)!important;color:#FFF!important}
+.btn:focus-visible,.capture-mode-switch button:focus-visible,.mode-switch button:focus-visible,
+input:focus-visible,select:focus-visible,textarea:focus-visible,.theme-card:focus-visible,
+.report-preview>summary:focus-visible,.settings-accordion>summary:focus-visible{
+ outline:2px solid var(--brand)!important;outline-offset:2px
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),select,textarea{
+ background:var(--panel);border:1px solid var(--border);color:var(--text);
+ min-height:39px;padding:9px 11px;line-height:1.35;font-size:13px;outline:none
+}
+textarea{min-height:55px;line-height:1.5}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.88}
+input:focus,select:focus,textarea:focus{border-color:var(--brand)!important;outline:2px solid transparent}
+select:disabled,input:disabled{color:var(--muted);background:var(--panel-soft);opacity:.75}
+/* All selection surfaces use the same stroke, radius and active fill. Radios remain circular for recognition. */
+.mode-switch,.capture-mode-switch{background:transparent!important;border:0!important;border-radius:8px;padding:0!important;gap:5px}
+.mode-switch button,.capture-mode-switch button{min-height:34px;border:1px solid var(--border)!important;background:var(--panel)!important;color:var(--text)!important;font-weight:650!important;padding:7px 10px!important}
+.mode-switch button:hover:not(.active),.capture-mode-switch button:hover:not(.active){background:var(--panel-soft)!important}
+input[type="checkbox"],input[type="radio"]{
+ appearance:none;-webkit-appearance:none;flex:0 0 16px!important;width:16px!important;height:16px!important;
+ margin:0!important;border:1px solid var(--border)!important;background:var(--panel)!important;
+ display:inline-grid;place-items:center;cursor:pointer;vertical-align:middle
+}
+input[type="checkbox"]{border-radius:5px!important}
+input[type="radio"]{border-radius:50%!important}
+input[type="checkbox"]:checked,input[type="radio"]:checked{background:var(--brand)!important;border-color:var(--brand)!important}
+input[type="checkbox"]:checked::before{content:"";width:7px;height:4px;border-left:2px solid #FFF;border-bottom:2px solid #FFF;transform:rotate(-45deg) translateY(-1px)}
+input[type="radio"]:checked::before{content:"";width:6px;height:6px;background:#FFF;border-radius:50%}
+input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.42;cursor:not-allowed}
+input[type="checkbox"]:focus-visible,input[type="radio"]:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px}
+.checkbox,.setting-check,.prereq-item{color:var(--text);font-size:12px;line-height:1.4;gap:7px;cursor:pointer}
+/* Three clear levels: page, section, field. No accent-colored headings. */
+.intake-title h2,#formTitle{font-size:19px!important;font-weight:750!important;letter-spacing:-.016em;line-height:1.22;color:var(--text)!important}
+.section-label,.settings-section-heading h3,.report h4,.task-builder>summary strong,
+.settings-subheading,.capture-mode-label,.profile-summary-head>label{
+ color:var(--text)!important;font-size:13px!important;font-weight:750!important;letter-spacing:0!important;
+ text-transform:none!important;line-height:1.35;margin:0 0 12px
+}
+.field label,.quick-field label,.summary-label-row>label:first-child{
+ color:var(--text)!important;font-size:12px!important;font-weight:650!important;letter-spacing:0!important;
+ line-height:1.35;margin-bottom:6px
+}
+.field-optional{font-size:10px;font-weight:500;color:var(--muted);margin-left:4px}
+#nameRequiredMark,#summaryRequiredMark,#nextStepsRequiredMark{font-weight:650;color:var(--text)}
+.intake-card .intake-head{padding:14px 16px;position:sticky;top:var(--topbar-height);background:var(--panel);border-bottom:1px solid var(--border)}
+.intake-headline{margin-bottom:12px;align-items:flex-start}
+.intake-title p{font-size:12px;line-height:1.4;color:var(--muted)}
+.save-group{gap:10px}
+.save-group .save-feedback,.save-feedback.dirty,.save-feedback.error,.save-feedback.saved{color:var(--muted)!important;font-size:11px;line-height:1.4}
+.intake-head-grid{gap:12px;grid-template-columns:minmax(0,1fr) minmax(174px,214px)}
+.interaction-setup{border:1px solid var(--border);border-radius:9px;padding:11px;gap:9px!important;background:var(--panel);align-self:stretch}
+.interaction-flags{gap:8px 13px;min-height:19px}
+.interaction-setup .capture-mode-bar{padding:0;min-height:0;border:0;background:transparent}
+.interaction-setup>.capture-mode-help{font-size:11px;line-height:1.35;color:var(--muted);margin:0}
+.intake-head-grid .quick-priority{border:1px solid var(--border);background:var(--panel)!important;padding:10px 11px;gap:10px;border-radius:9px;align-self:stretch}
+.intake-head-grid .quick-field label{color:var(--text)!important;margin-bottom:5px}
+.intake-head-grid .quick-field select{height:39px!important;font-size:12px!important;padding:8px 28px 8px 10px!important}
+.body{padding:16px}
+#interactionForm{display:flex;flex-direction:column;gap:14px}
+.field-group{border:1px solid var(--border);border-radius:10px;padding:15px;background:var(--panel);min-width:0}
+.field-group .section-label{margin:0 0 13px!important}
+.group-heading{display:flex;align-items:baseline;gap:9px;margin-bottom:13px}
+.group-heading .section-label{margin:0!important}
+#programIntake{margin-top:12px}
+.academic-multi-layout{gap:14px}
+.academic-repeat-list,.mcat-repeat-list{gap:14px}
+.academic-repeat-row.is-extra,.mcat-repeat-row.is-extra{border-color:var(--border)}
+.add-entry-btn{border:1px solid var(--border)!important;color:var(--text)!important;background:var(--panel)!important;margin-top:10px;padding:7px 10px;font-weight:650}
+.add-entry-btn:hover{background:var(--panel-soft)!important;border-color:var(--brand)!important}
+.entry-remove{color:var(--text);font-weight:600}
+.prereq-assessment{margin-top:15px!important}
+.prereq-choices{gap:8px 15px;padding:5px 0 7px}
+.prereq-choices .checkbox{font-size:12px}
+.prereq-grid{background:var(--panel-soft);border:1px solid var(--border);padding:12px}
+#experience{min-height:59px}
+.summary-label-row{margin-bottom:7px}
+.summary-label-row .profile-toggle{color:var(--text);font-weight:600;font-size:11px}
+.profile-summary-panel{border-color:var(--border)!important;background:var(--panel-soft)!important;padding:12px}
+.profile-summary-head>label{margin-bottom:0}
+#generatedProfile,#summary{line-height:1.5!important}
+.form-footer{margin-top:0;border:1px solid var(--border);border-radius:9px;padding:11px 13px;gap:10px}
+.form-secondary-actions .btn{min-height:34px}
+.recent-nav{margin-top:0;border-top:1px solid var(--border);padding-top:11px}
+/* Activity + report are single flat cards with typographic dividers, never nested colored boxes. */
+.activity{padding:12px 16px;gap:10px}
+.activity:hover{background:var(--panel-soft)}
+.activity strong{font-size:13px;font-weight:700}
+.activity .sub{font-size:11px;line-height:1.48}
+.dot{width:9px;height:9px;min-width:9px;display:inline-block;flex:0 0 9px}
+.report-wrap{padding:17px 18px}
+.report-head{align-items:center;margin-bottom:15px}
+.daily-glance{background:transparent!important;border:0!important;border-radius:0!important;padding:0 0 14px!important;font-size:12px;line-height:1.7}
+.glance-row+.glance-row{margin-top:3px}
+.report-legend-inline{padding:10px 0 13px;border-top:1px solid var(--border);gap:8px 15px;align-items:center}
+.report-legend-inline[hidden]{display:none!important}
+.legend-item{display:inline-flex;gap:7px;align-items:center;font-size:11px;line-height:1.45;color:var(--muted);white-space:normal}
+.report-preview{padding-top:11px;border-top:1px solid var(--border);margin-top:0}
+.report-preview>summary{color:var(--text)!important;font-size:12px;font-weight:650}
+.report-preview>summary:after,.task-builder>summary:after{color:var(--muted)}
+.report-preview .report,.report{border:0!important;background:transparent!important;padding:13px 0 3px!important;border-radius:0!important;font-size:12px;line-height:1.65}
+.report h4{font-size:12px!important;color:var(--text)!important;margin:15px 0 8px!important;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.report .metrics{gap:4px;margin-bottom:14px}
+.case{padding:10px 0;border-bottom:1px solid var(--border)}
+.identity{line-height:1.6;gap:5px 7px}
+.identity .name{font-weight:750}
+.identity .source{font-weight:650}
+.report-status-dot{vertical-align:middle;align-self:baseline;margin-top:5px}
+.sql-marker{color:var(--text);font-weight:700}
+.task-builder{border-top:1px solid var(--border);margin-top:11px}
+.task-builder>summary strong,.settings-subheading{color:var(--text)!important}
+/* Modals and utility components are equally flat, including dark mode. */
+.modal-box,.nav-dialog{box-shadow:none!important;border:1px solid var(--border);background:var(--panel);border-radius:12px}
+.modal-head{background:var(--panel)!important}
+.settings-section{border-color:var(--border)}
+.settings-section-heading h3{color:var(--text)}
+.settings-choice,.settings-nested{background:var(--panel);border-color:var(--border)}
+.settings-section-heading p,.settings-hint{color:var(--muted)}
+.settings-accordion>summary,.settings-nested>summary{color:var(--text)}
+.theme-card{border:1px solid var(--border);background:var(--panel);border-radius:8px}
+.theme-card.active{outline:0!important;border-color:var(--brand)!important;background:var(--panel-soft)}
+.swatch{background:var(--panel-soft)!important;color:var(--text)!important;border:1px solid var(--border);border-radius:7px;font-weight:700}
+.theme-card.active .swatch{background:var(--brand)!important;color:#FFF!important;border-color:var(--brand)}
+.combo-menu{background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:none!important}
+.combo-option{border:1px solid transparent;border-radius:7px}
+.combo-option.active{background:var(--brand)!important;color:#FFF!important;font-weight:650}
+.combo-option:hover:not(.active){background:var(--panel-soft)!important;color:var(--text)!important}
+.toast{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:8px;transform:none}
+.nav-dialog-shade,.modal{background:rgba(12,16,20,.45)}
+@media(max-width:940px){.intake-head-grid{grid-template-columns:minmax(0,1fr) minmax(160px,205px)}.interaction-setup{padding:9px}.field-group{padding:13px}}
+@media(max-width:760px){.layout{padding:10px}.intake-card .intake-head{padding:12px}.body{padding:12px}.intake-head-grid{gap:9px}.interaction-setup{padding:9px}.field-group{padding:12px}.report-wrap{padding:14px}.form-footer{flex-wrap:wrap}}
+@media(max-width:550px){.intake-head-grid{grid-template-columns:1fr}.intake-head-grid .quick-priority{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.interaction-setup{padding:10px}.intake-headline{gap:8px}.intake-title h2{font-size:17px!important}.save-group .save-feedback{max-width:76px}.card-head{padding:12px}.report-head{flex-wrap:wrap}}
+@media(max-width:390px){.intake-head-grid .quick-priority{grid-template-columns:1fr}.mode-switch,.capture-mode-switch{flex-wrap:wrap}.mode-switch button,.capture-mode-switch button{font-size:11px!important;padding:7px 8px!important}.group-heading{flex-wrap:wrap}}
+
+
+/* Small visible version marker; intentionally neutral across schools */
+.app-version{display:inline-flex;align-items:center;vertical-align:middle;padding:2px 6px;margin-left:3px;border:1px solid var(--border);border-radius:5px;background:var(--panel-soft);color:var(--muted);font-size:10px;line-height:1.4;font-weight:600;letter-spacing:0;white-space:nowrap}
+
+/* v33: restrained brand-colored surfaces on top of the v32 flat visual system.
+   No gradients, shadows, larger sections or semantic-status recoloring. */
+:root {
+  --tint-wash:color-mix(in srgb,var(--brand-soft) 58%,var(--panel));
+  --tint-light:color-mix(in srgb,var(--brand-soft) 38%,var(--panel));
+  --tint-border:color-mix(in srgb,var(--brand-border) 55%,var(--border));
+}
+body.dark {
+  /* The theme engine writes dark brand tokens on the root; inherit those here. */
+  --brand:inherit;
+  --brand-strong:inherit;
+  --brand-accent:inherit;
+  --brand-ink:inherit;
+  --brand-border:inherit;
+  --brand-soft:inherit;
+  --tint-wash:color-mix(in srgb,var(--brand-soft) 44%,var(--panel));
+  --tint-light:color-mix(in srgb,var(--brand-soft) 28%,var(--panel));
+  --tint-border:color-mix(in srgb,var(--brand-border) 43%,var(--border));
+}
+/* Preserve neutral hierarchy; make school identity visible in the active context. */
+.school-tag {
+  color:var(--brand-ink)!important;
+  background:var(--tint-wash)!important;
+  border-color:var(--tint-border)!important;
+}
+.interaction-setup {
+  background:var(--tint-light)!important;
+  border-color:var(--tint-border)!important;
+}
+.intake-head-grid .quick-priority {
+  background:var(--tint-wash)!important;
+  border-color:var(--tint-border)!important;
+}
+/* The academic section gets a quiet tinted header, without tinting its inputs. */
+.academic-group > .group-heading {
+  background:var(--tint-wash);
+  border-bottom:1px solid var(--tint-border);
+  border-radius:9px 9px 0 0;
+  margin:-13px -13px 13px!important;
+  padding:10px 13px;
+}
+.academic-group > .group-heading .section-label {margin:0!important;}
+/* Return a little warmth to the generated facts and compact daily totals. */
+.profile-summary-panel {
+  background:var(--tint-wash)!important;
+  border-color:var(--tint-border)!important;
+}
+.daily-glance {
+  background:var(--tint-light)!important;
+  border:1px solid var(--tint-border)!important;
+  border-radius:9px!important;
+  padding:11px 13px!important;
+  line-height:1.65;
+}
+/* Leave the full report flat, as in v32, and status colors semantic. */
+.report-preview .report,.report {background:transparent!important;border:0!important;}
+.section-label,.field label,.report h4 {color:var(--text)!important;}
+/* Recover a touch of v31 density without compressing inputs or tap targets. */
+#interactionForm {gap:12px;}
+.field-group {padding:13px;}
+.report-head {margin-bottom:11px;}
+@media (max-width:940px) {
+  .academic-group > .group-heading {
+    margin:-13px -13px 13px!important;
+    padding:10px 13px;
+  }
+}
+@media (max-width:760px) {
+  .field-group {padding:12px;}
+  .academic-group > .group-heading {
+    margin:-12px -12px 12px!important;
+    padding:9px 12px;
+  }
+}
+
+
+/* v33.1 — Correct the control boxes instead of offsetting their marks.
+   The v32 global input padding gave 16px radio/checkbox inputs a computed
+   24x22px box; a centered pseudo-element therefore appeared off-center. */
+input[type="checkbox"],input[type="radio"]{
+  box-sizing:border-box!important;
+  width:16px!important;
+  height:16px!important;
+  min-width:16px!important;
+  min-height:16px!important;
+  max-width:16px!important;
+  max-height:16px!important;
+  flex:0 0 16px!important;
+  padding:0!important;
+  margin:0!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  align-self:center;
+  line-height:normal;
+  vertical-align:middle;
+  overflow:visible;
+}
+input[type="radio"]:checked::before{
+  content:"";
+  display:block;
+  box-sizing:border-box;
+  width:6px;
+  height:6px;
+  border:0;
+  border-radius:50%;
+  background:#fff;
+  transform:none!important;
+  margin:0!important;
+}
+input[type="checkbox"]:checked::before{
+  content:"";
+  display:block;
+  box-sizing:border-box;
+  width:8px;
+  height:5px;
+  border:0;
+  border-left:2px solid #fff;
+  border-bottom:2px solid #fff;
+  border-radius:0;
+  background:transparent;
+  transform:translateY(-1px) rotate(-45deg)!important;
+  margin:0!important;
+}
+/* Hide redundant visual headings, retain headings for screen-reader navigation
+   and the #conversationTitle target used by the existing capture-mode script. */
+.field-group>.sr-only,
+.academic-group>.group-heading.sr-only{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+/* Do not preserve an empty colored academic heading band. */
+.field-group{padding:12px 13px!important;}
+#interactionForm{gap:11px;}
+@media(max-width:760px){.field-group{padding:11px 12px!important}}
+
+
+/* v1.1 — normal document scrolling; no frozen page/form headers. */
+.topbar{
+  position:relative!important;
+  top:auto!important;
+  z-index:5!important;
+}
+.intake-card .intake-head{
+  position:relative!important;
+  top:auto!important;
+  z-index:2!important;
+}
+@media(max-width:550px){
+  .intake-card .intake-head{position:relative!important;top:auto!important}
+}
+
+
+.task-time-helper{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:7px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.3;
+  flex-wrap:wrap;
+}
+.task-time-helper label{font-weight:700;color:var(--text)}
+.task-time-helper input{
+  width:138px;
+  min-height:30px;
+  padding:4px 7px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--panel);
+  color:var(--text);
+  font-size:10px;
+}
+
+
+/* v1.2 reporting and activity refinements */
+.save-feedback.dirty{color:#B57A00}
+.legend-copy-toggle{
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  font-size:10px;color:var(--muted);margin-left:auto
+}
+.legend-copy-toggle input{width:14px!important;height:14px!important;margin:0!important}
+.report-legend-toolbar{
+  display:flex;align-items:center;gap:10px;border-top:1px solid var(--border);
+  padding:9px 0 11px;flex-wrap:wrap
+}
+.report-legend-inline{
+  padding:0!important;border:0!important;gap:7px 12px!important;
+  display:flex!important;align-items:center;flex-wrap:wrap;flex:1 1 auto
+}
+.report-legend-inline .legend-title{
+  font-weight:800;color:var(--text);font-size:10px;letter-spacing:.01em;white-space:nowrap
+}
+.report-legend-inline .legend-item{white-space:nowrap;font-size:10px}
+.report .case{padding:4px 0!important}
+.report .identity{margin:0!important;line-height:1.45!important;gap:3px 5px!important}
+.report .report-meta-bold{font-weight:800}
+.report h4{font-weight:850!important}
+.report .metrics{margin-bottom:9px!important}
+@media(max-width:700px){
+  .report-legend-toolbar{align-items:flex-start}
+  .legend-copy-toggle{margin-left:0}
+}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="advisor-pill" id="advisorAccount" title="Advisor profile">
+      <span id="advisorFirstName">Advisor</span>
+    </div>
+    <div class="brand-copy">
+      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.2</span></h1>
+      <p>Simple same-day intake and manager-ready reporting.</p>
+      <span id="advisorDisplay" class="sr-only">Advisor</span>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn export-link" id="exportBtn" title="Export the manager-ready report">⇩ Export PDF</button>
+    <span class="action-spacer"></span>
+    <button class="btn" id="focusBtn" type="button" aria-pressed="false">▣ Focus mode</button>
+    <button class="btn" id="appearanceBtn">🌙 Dark</button>
+    <button class="btn" id="settingsBtn">⚙ Settings</button>
+    <button class="btn" id="newDayBtn">↻ Start New Day</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="card intake-card">
+    <div class="card-head intake-head" id="intakeHead">
+      <div class="intake-headline">
+        <div class="intake-title">
+          <h2 id="formTitle">Intake Interaction Form</h2>
+          <p>Capture the interaction and move on.</p>
+        </div>
+        <div class="save-group">
+          <span class="save-feedback" id="saveFeedback" role="status" aria-live="polite"></span>
+          <button type="submit" form="interactionForm" class="btn primary quick-save-btn" id="quickSaveBtn">Save as Activity</button>
+        </div>
+      </div>
+      <div class="intake-head-grid">
+        <div class="interaction-setup" role="group" aria-label="Call type and capture level">
+          <div class="interaction-flags" aria-label="Interaction tags">
+            <label class="checkbox" title="Booked Calendly appointment"><input id="isCalendly" type="checkbox" /> Calendly</label>
+            <label class="checkbox" title="Incoming SQL call"><input id="isSQL" type="checkbox" /> SQL (Incoming)</label>
+            <label class="checkbox" title="Post-deposit call, reported as Follow-Up"><input id="isPDC" type="checkbox" /> PDC</label>
+          </div>
+          <div class="mode-switch" aria-label="Contact type">
+            <button type="button" data-mode="new" class="active">New Contact</button>
+            <button type="button" data-mode="followup">Follow-Up</button>
+            <button type="button" data-mode="blitz">Call Blitz</button>
+          </div>
+          <div class="capture-mode-bar" aria-label="Call capture level">
+            <div class="capture-mode-switch" role="group" aria-label="Call capture level">
+              <button type="button" data-depth="quick" class="active" aria-pressed="true">Quick Log (No Response)</button>
+              <button type="button" data-depth="short" aria-pressed="false">Short Call</button>
+              <button type="button" data-depth="full" aria-pressed="false">Full Intake</button>
+            </div>
+          </div>
+          <span class="capture-mode-help" id="captureModeHelp">Record an unanswered attempt in seconds.</span>
+        </div>
+        <div class="quick-priority" aria-label="Call outcome and status">
+          <div class="quick-field">
+            <label for="callOutcome">Outcome *</label>
+            <select id="callOutcome" required>
+              <option value="">Select</option>
+              <option value="answered">Answered</option>
+              <option value="no_dial_tone">No dial tone</option>
+              <option value="no_response">No response</option>
+              <option value="not_connected">Not connected</option>
+              <option value="voicemail">Voicemail</option>
+              <option value="calendly_no_show" id="calendlyNoShowOption">Calendly No-Show</option>
+            </select>
+          </div>
+          <div class="quick-field">
+            <label for="status">Status *</label>
+            <select id="status" required></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="body">
+      <form id="interactionForm" novalidate>
+        <input type="hidden" id="recordId" />
+
+        <section class="field-group contact-group" aria-labelledby="contactGroupHeading">
+          <h3 id="contactGroupHeading" class="section-label sr-only">Contact info</h3>
+        <div class="grid top-four" id="prospectBasics" style="grid-template-columns:1.05fr .78fr .95fr 1fr;gap:10px">
+          <div class="field">
+            <label>Name <span id="nameRequiredMark">*</span></label>
+            <input id="name" required placeholder="Enter name" autocomplete="off" autocapitalize="words" spellcheck="false" />
+          </div>
+          <div class="field" data-full-basics>
+            <label>Country <span class="field-optional">optional</span></label>
+            <select id="market">
+              <option value="">Select</option>
+              <option value="us">U.S.</option>
+              <option value="canada">Canada</option>
+              <option value="international">International</option>
+            </select>
+          </div>
+          <div class="field" data-full-basics>
+            <label id="locationLabel">State / Province / Country</label>
+            <div class="combo" data-combo="location">
+              <input id="location" placeholder="Select country first" autocomplete="off" spellcheck="false" disabled />
+              <button class="combo-toggle" type="button" aria-label="Show location options" disabled>▼</button>
+              <div class="combo-menu"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Lead Source <span class="field-optional">optional</span></label>
+            <div class="combo" data-combo="leadSource">
+              <input id="leadSource" placeholder="Type or select" autocomplete="off" spellcheck="false" />
+              <button class="combo-toggle" type="button" aria-label="Show lead source options">▼</button>
+              <div class="combo-menu"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid second-line" id="programIntake" style="grid-template-columns:1.4fr .8fr .8fr;gap:12px;margin-top:12px">
+          <div class="field">
+            <label>Program of Interest *</label>
+            <div class="combo" data-combo="program">
+              <input id="program" required value="Doctor of Medicine" placeholder="Type or select" autocomplete="off" spellcheck="false" />
+              <button class="combo-toggle" type="button" aria-label="Show program options">▼</button>
+              <div class="combo-menu"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Intake Month <span class="field-optional">optional</span></label>
+            <select id="intakeMonth">
+              <option value="">Select month</option>
+              <option value="January">January</option>
+              <option value="May">May</option>
+              <option value="September">September</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Intake Year <span class="field-optional">optional</span></label>
+            <select id="intakeYear">
+              <option value="">No year selected</option>
+              <option value="2027" selected>2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+              <option value="2030">2030</option>
+              <option value="2031">2031</option>
+              <option value="2032">2032</option>
+              <option value="2033">2033</option>
+              <option value="2034">2034</option>
+              <option value="2035">2035</option>
+            </select>
+          </div>
+        </div>
+
+        </section>
+
+        <div id="academicContext" class="field-group academic-group"><div class="group-heading sr-only"><h3 class="section-label">Academic background</h3><span class="field-optional">optional details</span></div>
+        <div class="academic-multi-layout">
+          <div class="academic-history-group">
+            <div class="academic-repeat-list" id="academicRows">
+              <div class="academic-repeat-row" data-academic-row>
+                <div class="academic-row-fields">
+                  <div class="field"><label for="degreeSchool">Degree / Name of School</label><input id="degreeSchool" autocomplete="off" /></div>
+                  <div class="field"><label for="gradDate">Graduation Date</label><input id="gradDate" autocomplete="off" /></div>
+                  <div class="field"><label for="gpa">GPA</label><input id="gpa" inputmode="decimal" autocomplete="off" /></div>
+                </div>
+              </div>
+            </div>
+            <button class="add-entry-btn" id="addAcademicBtn" type="button" aria-label="Add another academic entry"><span aria-hidden="true">＋</span> Add academic entry</button>
+          </div>
+          <div class="mcat-history-group">
+            <div class="mcat-repeat-list" id="mcatRows">
+              <div class="mcat-repeat-row" data-mcat-row>
+                <div class="field"><label for="mcat">MCAT Score</label><input id="mcat" inputmode="numeric" autocomplete="off" /></div>
+              </div>
+            </div>
+            <button class="add-entry-btn" id="addMcatBtn" type="button" aria-label="Add another MCAT score"><span aria-hidden="true">＋</span> Add MCAT score</button>
+          </div>
+        </div>
+
+        <div class="field prereq-assessment" style="margin-top:12px">
+          <label>Prerequisite Assessment <span class="field-optional">optional</span></label>
+          <div class="prereq-choices" role="group" aria-label="Prerequisite assessment">
+            <label class="checkbox"><input type="radio" name="prereqAssessment" value="unassessed" checked /> Not assessed</label>
+            <label class="checkbox"><input type="radio" name="prereqAssessment" value="all" /> All prerequisites completed</label>
+            <label class="checkbox"><input type="radio" name="prereqAssessment" value="missing" /> Select missing prerequisites</label>
+          </div>
+          <div class="prereq-grid" id="prereqGrid" hidden>
+            <div class="prereq-col">
+              <label class="prereq-item"><input type="checkbox" value="General Biology I">General Bio I</label>
+              <label class="prereq-item"><input type="checkbox" value="General Biology II">General Bio II</label>
+            </div>
+            <div class="prereq-col">
+              <label class="prereq-item"><input type="checkbox" value="General Chemistry I">General Chem I</label>
+              <label class="prereq-item"><input type="checkbox" value="General Chemistry II">General Chem II</label>
+            </div>
+            <div class="prereq-col">
+              <label class="prereq-item"><input type="checkbox" value="Organic Chemistry I">Organic Chem I</label>
+              <label class="prereq-item"><input type="checkbox" value="Organic Chemistry II / Biochemistry">Organic Chem II / Biochem</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <label>Experience <span class="field-optional">optional</span></label>
+          <textarea id="experience" class="experience" placeholder="Clinical, research, work, volunteering, healthcare, or other useful background..."></textarea>
+        </div>
+
+        </div>
+        <div id="conversationContext" class="field-group conversation-group"><h3 class="section-label sr-only" id="conversationTitle">Conversation notes</h3>
+        <div class="field">
+          <div class="summary-label-row">
+            <label for="summary"><span id="summaryLabel">Call Summary / Notes</span> <span id="summaryRequiredMark" style="display:none">*</span></label>
+            <label class="checkbox profile-toggle" id="profileSummaryToggle"><input id="includeProfileDetails" type="checkbox" checked /> Include profile details</label>
+          </div>
+          <div class="profile-summary-panel" id="profileSummaryPanel" hidden>
+            <div class="profile-summary-head">
+              <label for="generatedProfile">Generated profile details — editable</label>
+              <button class="btn profile-refresh" type="button" id="refreshProfileBtn">Refresh details</button>
+            </div>
+            <textarea id="generatedProfile" rows="3" placeholder="Enter academic details or use Refresh details."></textarea>
+            <small id="profileSummaryHint">Updates while untouched. Your edits are kept until you choose Refresh details.</small>
+          </div>
+          <textarea id="summary" style="min-height:88px" placeholder="Write the discussion and agreed context here..."></textarea>
+        </div>
+        <div class="field" id="nextStepsField" style="margin-top:12px">
+          <label>Next Steps <span id="nextStepsRequiredMark" style="display:none">*</span></label>
+          <textarea id="nextSteps" style="min-height:46px" placeholder="What happens next?"></textarea>
+          <small id="conversationHelp" style="display:block;margin-top:5px;color:var(--muted)">Call Summary / Notes and Next Steps are required only when Call Outcome is Answered.</small>
+        </div>
+
+        </div>
+        <div class="form-footer">
+          <div><label class="checkbox"><input id="dailyReview" type="checkbox" checked /> Add to Daily Report Log</label></div>
+          <div class="form-secondary-actions">
+            <button type="button" class="btn" id="clearBtn">Clear form</button>
+            <button type="button" class="btn" id="copySfBtn">Copy to SF</button>
+          </div>
+        </div>
+      </form>
+      <div class="recent-nav" aria-label="Recent saved interactions">
+        <button id="prevRecord" class="btn nav-small" type="button" title="Previous saved interaction" aria-label="Previous saved interaction">‹</button>
+        <span id="recentNavLabel">Recent interactions</span>
+        <button id="nextRecord" class="btn nav-small" type="button" title="Next saved interaction" aria-label="Next saved interaction">›</button>
+        <button id="restoreDraftBtn" class="btn restore-draft" type="button" hidden>Restore draft</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="stack">
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>Today's Activity</h2>
+          <p id="activityCount">0 interactions saved</p>
+        </div>
+        <input id="searchActivity" placeholder="Search name or source..." style="max-width:240px" />
+      </div>
+      <div id="activityList" class="activity-list"></div>
+    </section>
+
+    <section class="card">
+      <div class="report-wrap">
+        <div class="report-head">
+          <div>
+            <h3>Daily Report Log</h3>
+            <p>Manager-ready summary for today.</p>
+          </div>
+          <button class="btn primary" id="copyBtn">Copy for Teams</button>
+        </div>
+        <div class="daily-glance" id="dailyGlance" aria-live="polite"></div>
+        <div class="report-legend-toolbar">
+          <div class="legend report-legend-inline" id="reportLegendInline" aria-label="Status legend"></div>
+          <label class="legend-copy-toggle" title="Controls whether the legend is included in Copy for Teams and PDF">
+            <input id="includeLegendQuick" type="checkbox" checked />
+            <span>Include in copy/PDF</span>
+          </label>
+        </div>
+        <details class="report-preview" id="reportPreview">
+          <summary>Show full Daily Report Log preview <span class="preview-summary-hint">(optional)</span></summary>
+          <div class="field" style="margin:10px 0">
+            <label>Optional Daily Observations</label>
+            <textarea id="dailyObservations" class="experience" placeholder="Add any manual notes or trends you want included in today's report..."></textarea>
+          </div>
+          <div class="report" id="report" role="region" aria-label="Full Daily Report Log preview" tabindex="0"></div>
+        </details>
+        <details class="task-builder" id="taskBuilderDetails">
+          <summary class="task-builder-head"><span>
+            <strong>Next Task Subject</strong>
+            <small>Optional Salesforce task-title generator</small>
+          </span></summary>
+          <div class="task-grid">
+            <div class="field" id="taskCallField"><label>Current Call #</label><input id="currentCallNumber" type="number" min="0" step="1" value="1" /></div>
+            <div class="field" id="taskTimezoneField"><label>Time Zone</label>
+              <select id="taskTimezoneOverride">
+                <option value="">Auto from location</option>
+                <option value="AT">AT</option>
+                <option value="ET">ET</option>
+                <option value="CT">CT</option>
+                <option value="MT">MT</option>
+                <option value="PT">PT (U.S.)</option>
+                <option value="NL">NL</option>
+                <option value="SK">SK (CST)</option>
+                <option value="YT">YT (UTC-7)</option>
+                <option value="BC_PCT">B.C. PCT</option>
+                <option value="AZ">AZ (MST)</option>
+                <option value="HI">HI</option>
+                <option value="INTL">INTL</option>
+              </select>
+            </div>
+            <div class="field" id="taskNoteField"><label>Task Note</label><input id="taskNote" placeholder="e.g. Check if ready to apply" autocomplete="off" /></div>
+          </div>
+          <div class="task-time-helper">
+            <label for="taskTimezoneDate">Time-zone date</label>
+            <input id="taskTimezoneDate" type="date" />
+            <span id="taskTimezoneExplanation">Uses the selected date so daylight-saving differences are calculated correctly.</span>
+          </div>
+          <div class="task-output-row">
+            <input id="taskSubjectOutput" readonly aria-label="Generated next task subject" />
+            <button class="btn secondary" type="button" id="copyTaskSubjectBtn">Copy Task Subject</button>
+          </div>
+        </details>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="nav-dialog-shade" id="navDialog" hidden>
+  <div class="nav-dialog" role="dialog" aria-modal="true" aria-labelledby="navDialogTitle">
+    <h3 id="navDialogTitle">Unsaved interaction</h3>
+    <p>What would you like to do before opening another interaction?</p>
+    <div class="nav-dialog-actions">
+      <button class="btn primary" id="navSave" type="button">Save interaction</button>
+      <button class="btn" id="navKeep" type="button">Keep draft</button>
+      <button class="btn" id="navDiscard" type="button">Discard changes</button>
+      <button class="btn" id="navCancel" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsHeading">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="settings-heading">
+        <strong id="settingsHeading">Workspace settings</strong>
+        <span>Personalize your advising and reporting tools</span>
+      </div>
+      <button class="btn" type="button" id="closeSettings">Close</button>
+    </div>
+    <div class="modal-body" id="settingsScrollArea">
+      <section class="settings-section" aria-labelledby="personalizationHeading">
+        <div class="settings-section-heading">
+          <h3 id="personalizationHeading">Personalization</h3>
+          <p>Your name and school identity in this browser.</p>
+        </div>
+        <div class="field">
+          <label for="advisorName">Advisor name</label>
+          <input id="advisorName" placeholder="First and last name" autocomplete="name" />
+        </div>
+        <div class="settings-subheading">School theme</div>
+        <div class="theme-grid" role="group" aria-label="School theme">
+          <div class="theme-card" data-theme="saba" role="button" tabindex="0" aria-label="Use Saba theme" aria-pressed="false">
+            <div class="swatch" style="background:#326295">Saba</div>
+          </div>
+          <div class="theme-card" data-theme="mua" role="button" tabindex="0" aria-label="Use MUA theme" aria-pressed="false">
+            <div class="swatch" style="background:#861F41">MUA</div>
+          </div>
+          <div class="theme-card" data-theme="smu" role="button" tabindex="0" aria-label="Use SMU theme" aria-pressed="false">
+            <div class="swatch" style="background:#5E2751">SMU</div>
+          </div>
+        </div>
+        <div class="settings-subheading country-heading">Common international countries</div>
+        <p class="settings-hint">Add countries that appear frequently. International remains a free-text field even when no country is saved here.</p>
+        <div class="settings-inline-field">
+          <input id="commonCountryInput" placeholder="e.g. India" autocomplete="off" aria-label="Common country name" />
+          <button class="btn secondary" type="button" id="addCommonCountryBtn">Add</button>
+        </div>
+        <div id="commonCountryList" class="tag-list" aria-live="polite"></div>
+        <div class="settings-subheading country-heading">Lead sources</div>
+        <p class="settings-hint">Add a lead source your advisor uses. Custom sources are merged with the standard list and shown alphabetically.</p>
+        <div class="settings-inline-field">
+          <input id="customLeadSourceInput" placeholder="e.g. Alumni Referral" autocomplete="off" aria-label="Custom lead source" />
+          <button class="btn secondary" type="button" id="addCustomLeadSourceBtn">Add</button>
+        </div>
+        <div id="customLeadSourceList" class="tag-list" aria-live="polite"></div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="reportSettingsHeading">
+        <div class="settings-section-heading">
+          <h3 id="reportSettingsHeading">Daily Report Log</h3>
+          <p>Choose how the manager-ready report appears.</p>
+        </div>
+        <label class="settings-choice">
+          <input id="reportIncludeProgramSetting" type="checkbox" />
+          <span><strong>Show program in the Daily Report Log</strong><small>Off by default. When enabled, the selected program appears after the intake using a short label such as MD, PMM, PVM, GMP or GVP.</small></span>
+        </label>
+        <label class="settings-choice">
+          <input id="includeLegendSetting" type="checkbox" checked />
+          <span><strong>Include the status legend in copied reports and PDF</strong><small>The legend remains visible on screen for advisor reference even when this is turned off.</small></span>
+        </label>
+        <label class="settings-choice">
+          <input id="reportPreviewDefaultSetting" type="checkbox" />
+          <span><strong>Open the full Daily Report Log preview by default</strong><small>Normally the full report stays collapsed. Copy for Teams is always available.</small></span>
+        </label>
+      </section>
+
+      <section class="settings-section" aria-labelledby="sfSettingsHeading">
+        <div class="settings-section-heading">
+          <h3 id="sfSettingsHeading">Copy to Salesforce</h3>
+          <p>Choose optional profile details to include when copying an interaction.</p>
+        </div>
+        <p class="settings-hint">The note starts with Academic &amp; Profile Context and Conversation. Select additional fields only if your team needs them.</p>
+        <div class="task-settings-grid settings-checkbox-grid">
+          <label class="setting-check"><input id="sfName" type="checkbox" /> Name</label>
+          <label class="setting-check"><input id="sfCountry" type="checkbox" /> Country / market</label>
+          <label class="setting-check"><input id="sfLocation" type="checkbox" /> State, province or country</label>
+          <label class="setting-check"><input id="sfLeadSource" type="checkbox" /> Lead source</label>
+          <label class="setting-check"><input id="sfProgram" type="checkbox" /> Program of interest</label>
+          <label class="setting-check"><input id="sfIntake" type="checkbox" /> Intended intake</label>
+          <label class="setting-check"><input id="sfOutcome" type="checkbox" /> Call outcome / status</label>
+        </div>
+      </section>
+
+      <details class="settings-accordion" id="advancedSettings">
+        <summary>
+          <span class="settings-accordion-title">Advanced tools<small>Follow-up task subject and time-zone preferences</small></span>
+          <span class="settings-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="settings-accordion-content">
+          <div class="settings-section-heading">
+            <h3>Follow-up task subject</h3>
+            <p>Build your own Salesforce task title. Turn off any component you do not use; the live example updates as you edit.</p>
+          </div>
+          <div class="task-settings-grid settings-checkbox-grid">
+            <label class="setting-check"><input id="taskIncludeTimezone" type="checkbox" /> Time zone / offset</label>
+            <label class="setting-check"><input id="taskIncludeCall" type="checkbox" /> Next call number</label>
+            <label class="setting-check"><input id="taskIncludeIntake" type="checkbox" /> Intake</label>
+            <label class="setting-check"><input id="taskIncludeNote" type="checkbox" /> Task note</label>
+          </div>
+          <div class="grid g2 settings-task-inputs">
+            <div class="field"><label for="taskCallWord">Call wording</label><input id="taskCallWord" placeholder="Call" /></div>
+            <div class="field"><label for="taskSeparator">Separator before task note</label><input id="taskSeparator" placeholder=" - " /></div>
+          </div>
+          <div class="task-settings-grid settings-checkbox-grid">
+            <label class="setting-check"><input id="taskTimezoneBrackets" type="checkbox" /> Time zone in parentheses</label>
+            <label class="setting-check"><input id="taskIntakeBrackets" type="checkbox" /> Intake in parentheses</label>
+          </div>
+          <div class="format-preview"><span class="settings-example-label">Example:</span> <span id="taskFormatPreview"></span></div>
+          <p class="settings-hint">Current Call # is a plain number. With the default format, current Call 1 generates the next task as Call 2.</p>
+          <details class="settings-nested" id="timezoneSettings">
+            <summary>Time-zone preferences <span aria-hidden="true">⌄</span></summary>
+            <div class="settings-nested-body">
+              <p class="settings-hint">Choose your home region. The task subject calculates the actual time difference for the selected date, including daylight-saving rules. Multi-zone states/provinces can still be overridden on the main page.</p>
+              <div class="grid g2">
+                <div class="field"><label for="advisorTimezone">Your home region / time zone</label><select id="advisorTimezone">
+                  <option value="ET">Eastern — Ontario / Quebec</option>
+                  <option value="CT">Central — Manitoba</option>
+                  <option value="AT">Atlantic — NB / NS / PEI</option>
+                  <option value="NL">Newfoundland</option>
+                  <option value="MT">Mountain — Alberta</option>
+                  <option value="PT">Pacific — U.S. Pacific</option>
+                  <option value="BC_PCT">British Columbia — PCT (UTC-7 year-round)</option>
+                  <option value="SK">Saskatchewan — CST (UTC-6 year-round)</option>
+                  <option value="YT">Yukon — UTC-7 year-round</option>
+                  <option value="AZ">Arizona — MST year-round</option>
+                  <option value="HI">Hawaii</option>
+                </select></div>
+                <div class="field"><label for="internationalCode">International default</label><input id="internationalCode" placeholder="INTL" /></div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <details class="settings-accordion settings-status" id="statusDetails">
+        <summary>
+          <span class="settings-accordion-title">Status labels &amp; legend<small>Locked by default; change only when your team needs to</small></span>
+          <span class="settings-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="settings-accordion-content">
+          <div class="status-lock-row">
+            <p class="settings-hint">These labels appear in the Status dropdown and Daily Report Log. Unlock deliberately to edit wording; colors and saved status codes remain unchanged.</p>
+            <button class="btn secondary" type="button" id="toggleStatusLockBtn">Unlock editing</button>
+          </div>
+          <div class="grid g2">
+            <div class="field"><label for="statusGreenLabel"><span class="dot green" style="display:inline-block;margin-right:6px"></span>Green status</label><input id="statusGreenLabel" readonly aria-readonly="true" /></div>
+            <div class="field"><label for="statusYellowLabel"><span class="dot yellow" style="display:inline-block;margin-right:6px"></span>Yellow status</label><input id="statusYellowLabel" readonly aria-readonly="true" /></div>
+            <div class="field"><label for="statusRedLabel"><span class="dot red" style="display:inline-block;margin-right:6px"></span>Red status</label><input id="statusRedLabel" readonly aria-readonly="true" /></div>
+            <div class="field"><label for="statusGrayLabel"><span class="dot gray" style="display:inline-block;margin-right:6px"></span>Gray status</label><input id="statusGrayLabel" readonly aria-readonly="true" /></div>
+          </div>
+        </div>
+      </details>
+    </div>
+    <div class="settings-footer">
+      <span class="settings-storage-note">Preferences are stored in this browser.</span>
+      <button class="btn primary" type="button" id="saveSettingsBtn">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const STORAGE_KEY = "advisor-lite-v2.records";
+  const SETTINGS_KEY = "advisor-lite-v2.settings";
+
+  const LEAD_SOURCES = [
+    "Bing Organic","Bing PPC Search","Direct Email","Phone Call","Direct Traffic",
+    "Email Marketing","Event","Facebook PPC","Facebook Organic","Google AdWords Demand Gen",
+    "Google AdWords Display","Google AdWords PMax","Google AdWords Search","Google Organic",
+    "Instagram","Instagram PPC","LinkedIn","LinkedIn PPC","Other","Other Organic",
+    "Purchase List","Unknown","Unlisted","AI Referral"
+  ];
+
+  const US_STATES = [
+    "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
+    "Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
+    "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi",
+    "Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico",
+    "New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
+    "Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
+    "Virginia","Washington","West Virginia","Wisconsin","Wyoming"
+  ];
+
+  const CANADA_PROVINCES = [
+    "Alberta","British Columbia","Manitoba","New Brunswick","Newfoundland and Labrador",
+    "Nova Scotia","Ontario","Prince Edward Island","Quebec","Saskatchewan",
+    "Northwest Territories","Nunavut","Yukon"
+  ];
+
+  const PROGRAMS_BY_SCHOOL = {
+    saba:[
+      "Doctor of Medicine", "Pre-Medical Master's", "Gateway Medical Program", "General Inquiry"
+    ],
+    mua:[
+      "Doctor of Medicine", "Pre-Medical Master's", "Gateway Medical Program",
+      "Pre-Med 5-Year", "Pre-Med 6-Year", "MBBS to MD", "General Inquiry"
+    ],
+    smu:[
+      "Doctor of Medicine", "Pre-Medical Master's", "Gateway Medical Program",
+      "Doctor of Veterinary Medicine", "Pre-Vet Master's", "Gateway Veterinary Program",
+      "General Inquiry"
+    ]
+  };
+
+  // v1.1: date-aware time-zone handling.
+  // Legacy AT/ET/CT/MT/PT values remain supported so existing saved settings continue to work.
+  const LEGACY_ZONE_MAP = {
+    AT:"America/Halifax",
+    ET:"America/Toronto",
+    CT:"America/Winnipeg",
+    MT:"America/Edmonton",
+    PT:"America/Los_Angeles",
+    NL:"America/St_Johns",
+    SK:"America/Regina",
+    YT:"America/Whitehorse",
+    AZ:"America/Phoenix",
+    HI:"Pacific/Honolulu",
+    BC_PCT:"BC_PCT"
+  };
+  const FIXED_ZONE_OFFSETS = {
+    // Most of British Columbia uses permanent Pacific Time (PCT), UTC-7, from March 2026.
+    BC_PCT:-420
+  };
+  const US_STATE_TZ = {
+    "Alabama":"CT","Alaska":"America/Anchorage","Arizona":"America/Phoenix","Arkansas":"CT",
+    "California":"PT","Colorado":"MT","Connecticut":"ET","Delaware":"ET","Florida":"ET",
+    "Georgia":"ET","Hawaii":"Pacific/Honolulu","Idaho":"MT","Illinois":"CT","Indiana":"ET",
+    "Iowa":"CT","Kansas":"CT","Kentucky":"ET","Louisiana":"CT","Maine":"ET","Maryland":"ET",
+    "Massachusetts":"ET","Michigan":"ET","Minnesota":"CT","Mississippi":"CT","Missouri":"CT",
+    "Montana":"MT","Nebraska":"CT","Nevada":"PT","New Hampshire":"ET","New Jersey":"ET",
+    "New Mexico":"MT","New York":"ET","North Carolina":"ET","North Dakota":"CT","Ohio":"ET",
+    "Oklahoma":"CT","Oregon":"PT","Pennsylvania":"ET","Rhode Island":"ET","South Carolina":"ET",
+    "South Dakota":"CT","Tennessee":"CT","Texas":"CT","Utah":"MT","Vermont":"ET",
+    "Virginia":"ET","Washington":"PT","West Virginia":"ET","Wisconsin":"CT","Wyoming":"MT"
+  };
+  const CANADA_PROVINCE_TZ = {
+    "Alberta":"MT",
+    "British Columbia":"BC_PCT",
+    "Manitoba":"CT",
+    "New Brunswick":"America/Moncton",
+    "Newfoundland and Labrador":"America/St_Johns",
+    "Nova Scotia":"AT",
+    "Ontario":"ET",
+    "Prince Edward Island":"AT",
+    "Quebec":"ET",
+    "Saskatchewan":"SK",
+    "Northwest Territories":"MT",
+    "Nunavut":"America/Iqaluit",
+    "Yukon":"YT"
+  };
+  const MULTI_TZ_LOCATIONS = new Set([
+    "Alaska","Florida","Idaho","Indiana","Kansas","Kentucky","Michigan","Nebraska",
+    "North Dakota","Oregon","South Dakota","Tennessee","Texas",
+    "British Columbia","Newfoundland and Labrador","Nunavut","Ontario","Quebec","Saskatchewan"
+  ]);
+
+  // Official primary palette plus restrained supporting accents derived from the
+  // supplied school brand guide. The light/dark tokens are purely presentational.
+  const THEMES = {
+    saba:{label:"Saba",brand:"#326295",strong:"#254D76",accent:"#418FDE",pale:"#9BCBEB",soft:"#EEF5FB",ink:"#28547F",darkInk:"#A7D4FF",darkSoft:"rgba(65,143,222,.15)",darkBorder:"rgba(125,180,234,.32)"},
+    mua:{label:"MUA",brand:"#861F41",strong:"#6D1935",accent:"#B17C84",pale:"#E6C9D0",soft:"#FCF2F5",ink:"#7B1E3A",darkInk:"#EAB7C4",darkSoft:"rgba(171,80,108,.17)",darkBorder:"rgba(218,151,174,.32)"},
+    smu:{label:"SMU",brand:"#5E2751",strong:"#4E2044",accent:"#A2789C",pale:"#DECBDD",soft:"#F8F1F8",ink:"#57254B",darkInk:"#E1B9DA",darkSoft:"rgba(147,93,140,.18)",darkBorder:"rgba(196,147,192,.34)"}
+  };
+
+  let settings = {
+    advisorName:"",
+    theme:"saba",
+    appearance:"light",
+    statusLabels:{
+      applying:"Applying / Likely Applying",
+      followup:"Nurturing",
+      notprogressing:"Not Progressing",
+      none:"None / Unclear"
+    },
+    includeLegend:true,
+    reportIncludeProgram:false,
+    reportPreviewDefaultOpen:false,
+    customLeadSources:[],
+    sfInclude:{name:false,country:false,location:false,leadSource:false,program:false,intake:false,outcome:false},
+    taskFormat:{advisorTimezone:"ET",internationalCode:"INTL",includeTimezone:true,includeCall:true,includeIntake:true,includeNote:true,callWord:"Call",separator:" - ",timezoneBrackets:true,intakeBrackets:true}
+  };
+  let records = [];
+
+  const $ = id => document.getElementById(id);
+  let isDirty=false;
+  function setDirty(value){
+    isDirty=Boolean(value);
+    const feedback=$("saveFeedback");
+    if(!feedback)return;
+    if(isDirty){feedback.textContent="Not saved yet";feedback.className="save-feedback dirty";}
+    else if(feedback.classList.contains("dirty")){feedback.textContent="";feedback.className="save-feedback";}
+  }
+  function formNotice(message,type="error"){
+    const feedback=$("saveFeedback");
+    feedback.textContent=message;
+    feedback.className="save-feedback "+type;
+  }
+  function confirmDiscard(){return !isDirty || confirm("You have unsaved interaction changes. Discard them?");}
+  function saveError(message,field){
+    formNotice("Not saved — "+message,"error");
+    toast("Not saved — "+message);
+    if(field){field.focus();field.scrollIntoView({block:"center",behavior:"smooth"});}
+    return null;
+  }
+
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+  })[ch]);
+
+  function localDateKey(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function todayLabel(){
+    return new Date().toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"});
+  }
+
+  function makeId(){
+    if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+    return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function observationsKey(){
+    return `advisor-lite-v2.observations.${localDateKey()}`;
+  }
+
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  }
+
+  function saveSettings(){
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
+
+  function loadState(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      records = Array.isArray(saved) ? saved : [];
+    }catch(e){ records = []; }
+
+    try{
+      const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+      settings = Object.assign(settings, savedSettings || {});
+      settings.statusLabels=Object.assign({
+        applying:"Applying / Likely Applying",followup:"Nurturing",notprogressing:"Not Progressing",none:"None / Unclear"
+      },savedSettings.statusLabels||{});
+      if(typeof settings.includeLegend !== "boolean") settings.includeLegend = true;
+      if(typeof settings.reportIncludeProgram !== "boolean") settings.reportIncludeProgram = false;
+      if(typeof settings.reportPreviewDefaultOpen !== "boolean") settings.reportPreviewDefaultOpen = false;
+      settings.customLeadSources=Array.isArray(settings.customLeadSources)?settings.customLeadSources:[];
+      settings.sfInclude=Object.assign({name:false,country:false,location:false,leadSource:false,program:false,intake:false,outcome:false},settings.sfInclude||{});
+      settings.taskFormat=Object.assign({advisorTimezone:"ET",internationalCode:"INTL",includeTimezone:true,includeCall:true,includeIntake:true,includeNote:true,callWord:"Call",separator:" - ",timezoneBrackets:true,intakeBrackets:true},settings.taskFormat||{});
+    }catch(e){}
+
+    const seededKey="advisor-lite-v25.initial-samples";
+    if(!localStorage.getItem(seededKey)){
+      if(localStorage.getItem(STORAGE_KEY)===null && !records.length) seedSampleData();
+      localStorage.setItem(seededKey,"1");
+    }
+  }
+
+  function seedSampleData(){
+    const d = localDateKey();
+    const now = Date.now();
+    records = [
+      {
+        id:makeId(),date:d,createdAt:new Date(now-1000*60*145).toISOString(),updatedAt:new Date(now-1000*60*145).toISOString(),
+        mode:"new",name:"Maria Santos",market:"canada",location:"Ontario",leadSource:"Google AdWords Search",program:"Doctor of Medicine",
+        intakeMonth:"January",intakeYear:"2027",gradDate:"May 2026",degreeSchool:"BSc Health Sciences — York University",
+        gpa:"3.52",mcat:"505",prerequisites:["General Biology I","General Biology II","General Chemistry I","General Chemistry II","Organic Chemistry I"],experience:"Clinical volunteering and research assistant experience.",isCalendly:true,callOutcome:"answered",
+        status:"applying",summary:"Very interested in applying and reviewing the remaining prerequisite timeline.",
+        nextSteps:"Send application steps and follow up on Friday.",dailyReview:true
+      },
+      {
+        id:makeId(),date:d,createdAt:new Date(now-1000*60*100).toISOString(),updatedAt:new Date(now-1000*60*100).toISOString(),
+        mode:"followup",name:"David Lee",market:"canada",location:"Ontario",leadSource:"Facebook PPC",program:"Gateway Medical",
+        intakeMonth:"May",intakeYear:"2027",gradDate:"2025",degreeSchool:"BSc Biology — McMaster University",
+        gpa:"3.31",mcat:"",prerequisites:["General Biology I","General Biology II","General Chemistry I"],experience:"Hospital volunteer experience.",isCalendly:false,callOutcome:"answered",
+        status:"followup",summary:"Interested but needs more time to discuss financing and timing with family.",
+        nextSteps:"Follow up next week.",dailyReview:true
+      },
+      {
+        id:makeId(),date:d,createdAt:new Date(now-1000*60*54).toISOString(),updatedAt:new Date(now-1000*60*54).toISOString(),
+        mode:"new",name:"Sara Ahmed",market:"canada",location:"Ontario",leadSource:"Other Organic",program:"Pre-Med Master's",
+        intakeMonth:"September",intakeYear:"2027",gradDate:"April 2026",degreeSchool:"BSc Biomedical Sciences — University of Ottawa",
+        gpa:"3.18",mcat:"498",prerequisites:["General Biology I","General Chemistry I"],experience:"Research and community volunteering.",isCalendly:true,callOutcome:"calendly_no_show",
+        status:"",summary:"After discussing current circumstances, she does not plan to move forward at this time.",
+        nextSteps:"No further follow-up requested.",dailyReview:true
+      },
+      {
+        id:makeId(),date:d,createdAt:new Date(now-1000*60*20).toISOString(),updatedAt:new Date(now-1000*60*20).toISOString(),
+        mode:"blitz",name:"James Carter",market:"canada",location:"Ontario",leadSource:"Purchase List",program:"Pre-Med 5-Year",
+        intakeMonth:"January",intakeYear:"2028",gradDate:"2024",degreeSchool:"BSc Psychology — Western University",
+        gpa:"3.40",mcat:"",prerequisites:["General Biology I"],experience:"Healthcare administration experience.",isCalendly:false,callOutcome:"no_response",
+        status:"",summary:"Reached briefly but did not have enough time to fully assess interest.",
+        nextSteps:"Try again later this week.",dailyReview:true
+      },
+      {
+        id:makeId(),date:d,createdAt:new Date(now-1000*60*8).toISOString(),updatedAt:new Date(now-1000*60*8).toISOString(),
+        mode:"new",name:"Nina Patel",market:"canada",location:"Ontario",leadSource:"Referral",program:"Pre-Med 6-Year",
+        intakeMonth:"September",intakeYear:"2028",gradDate:"June 2027",degreeSchool:"High School / Pre-University Studies",
+        gpa:"",mcat:"",prerequisites:[],experience:"Volunteer experience in a community health setting.",isCalendly:false,callOutcome:"answered",
+        status:"followup",summary:"Interested in the six-year pathway and wants to understand entry requirements and timing.",
+        nextSteps:"Send pathway information and follow up next week.",dailyReview:true
+      }
+    ];
+    saveState();
+  }
+
+  function populateLists(){
+    // Fixed suggestion lists are rendered by the custom comboboxes.
+    // User-entered values are not added back into these suggestion lists.
+  }
+
+
+  function comboOptionsFor(key){
+    if(key==="leadSource"){
+      const merged=[...LEAD_SOURCES,...(settings.customLeadSources||[])];
+      const seen=new Set();
+      return merged.filter(item=>{
+        const key=String(item||"").trim().toLowerCase();
+        if(!key || seen.has(key))return false;
+        seen.add(key);return true;
+      }).sort((a,b)=>a.localeCompare(b));
+    }
+    if(key==="program") return PROGRAMS_BY_SCHOOL[settings.theme] || PROGRAMS_BY_SCHOOL.saba;
+    if(key==="location"){
+      const market=$("market") ? $("market").value : "";
+      if(market==="us") return US_STATES;
+      if(market==="canada") return CANADA_PROVINCES;
+      if(market==="international") return settings.commonCountries || [];
+      return [];
+    }
+    return [];
+  }
+
+  function renderCombo(combo, forceAll=false){
+    const key = combo.dataset.combo;
+    const input = combo.querySelector("input");
+    const menu = combo.querySelector(".combo-menu");
+    const raw = input.value.trim().toLowerCase();
+    const all = comboOptionsFor(key);
+    const matches = forceAll || !raw ? all : all.filter(x=>x.toLowerCase().includes(raw));
+    menu.innerHTML = matches.length
+      ? matches.map(x=>`<div class="combo-option" data-value="${esc(x)}">${esc(x)}</div>`).join("")
+      : `<div class="combo-empty">No preset match — you can keep your typed value.</div>`;
+    combo.classList.add("open");
+    menu.querySelectorAll(".combo-option").forEach(opt=>{
+      opt.addEventListener("mousedown", e=>{
+        e.preventDefault();
+        input.value = opt.dataset.value;
+        combo.classList.remove("open");
+        input.dispatchEvent(new Event("change",{bubbles:true}));
+      });
+    });
+  }
+
+  function wireComboboxes(){
+    document.querySelectorAll(".combo").forEach(combo=>{
+      const input = combo.querySelector("input");
+      const toggle = combo.querySelector(".combo-toggle");
+
+      input.addEventListener("focus",()=>renderCombo(combo,false));
+      input.addEventListener("input",()=>renderCombo(combo,false));
+      toggle.addEventListener("click",e=>{
+        e.preventDefault();
+        if(combo.classList.contains("open")) combo.classList.remove("open");
+        else { input.focus(); renderCombo(combo,true); }
+      });
+    });
+
+    document.addEventListener("mousedown",e=>{
+      document.querySelectorAll(".combo.open").forEach(combo=>{
+        if(!combo.contains(e.target)) combo.classList.remove("open");
+      });
+    });
+  }
+
+  function outcomeLabel(value){
+    const map={
+      answered:"Answered",
+      no_dial_tone:"No dial tone",
+      no_response:"No response",
+      not_connected:"Not connected",
+      voicemail:"Voicemail",
+      calendly_no_show:"Calendly No-Show"
+    };
+    return map[value] || "";
+  }
+
+  function updateInteractionFlags(changed=""){
+    const pdc=$("isPDC"),sql=$("isSQL"),cal=$("isCalendly");
+    if(changed==="pdc" && pdc.checked){sql.checked=false;cal.checked=false;setMode("followup");}
+    if(changed==="sql"&&sql.checked){pdc.checked=false;cal.checked=false;}
+    if(changed==="calendly"&&cal.checked){pdc.checked=false;sql.checked=false;}
+    if(getMode()==="blitz"){cal.checked=false;sql.checked=false;}
+    if(pdc.checked && getMode()!=="followup")setMode("followup");
+    cal.disabled=getMode()==="blitz"||pdc.checked||sql.checked;
+    sql.disabled=getMode()==="blitz"||pdc.checked||cal.checked;
+    pdc.disabled=cal.checked||sql.checked;
+    document.querySelectorAll('.mode-switch button').forEach(btn=>{
+      btn.disabled=pdc.checked&&btn.dataset.mode!=="followup";
+    });
+    // PDC now reports as Follow-Up; never silently exclude it.
+    $("dailyReview").disabled=false;
+    if(changed==="pdc" && pdc.checked)$("dailyReview").checked=true;
+    updateOutcomeOptions();
+  }
+  function updateOutcomeOptions(){
+    const calendly=$("isCalendly");
+    const outcome=$("callOutcome");
+    const noShow=$("calendlyNoShowOption");
+    if(!calendly || !outcome || !noShow) return;
+    const allowNoShow=calendly.checked && getMode()!=="blitz";
+    const answeredOption=outcome.querySelector('option[value="answered"]');
+    if(answeredOption)answeredOption.disabled=getCaptureDepth()==="quick";
+    if(getCaptureDepth()==="quick" && outcome.value==="answered")outcome.value="no_response";
+    noShow.hidden=!allowNoShow;
+    noShow.disabled=!allowNoShow;
+    if(!allowNoShow && outcome.value==="calendly_no_show") outcome.value="";
+  }
+
+  function updateStatusAvailability(){
+    const status=$("status");
+    const answered=$("callOutcome") && $("callOutcome").value==="answered";
+    if(!status) return;
+
+    status.disabled=!answered;
+
+    const summary=$("summary");
+    const nextSteps=$("nextSteps");
+    const summaryMark=$("summaryRequiredMark");
+    const nextMark=$("nextStepsRequiredMark");
+
+    if(summary) summary.required=answered && getCaptureDepth()!=="quick";
+    if(nextSteps) nextSteps.required=answered && getCaptureDepth()!=="quick";
+    if(summaryMark) summaryMark.style.display=answered && getCaptureDepth()!=="quick" ? "inline" : "none";
+    if(nextMark) nextMark.style.display=answered && getCaptureDepth()!=="quick" ? "inline" : "none";
+
+    if(!answered){
+      status.value="";
+      status.setAttribute("aria-disabled","true");
+      status.title="Status is only used when the call outcome is Answered";
+    }else{
+      status.removeAttribute("aria-disabled");
+      status.title="";
+    }
+  }
+
+  function statusMeta(value){
+    const labels = settings.statusLabels || {};
+    const map = {
+      applying:{label:labels.applying || "Applying / Likely Applying",dot:"green",badge:"badge-green",icon:"🟢"},
+      followup:{label:labels.followup || "Nurturing",dot:"yellow",badge:"badge-yellow",icon:"🟡"},
+      notprogressing:{label:labels.notprogressing || "Not Progressing",dot:"red",badge:"badge-red",icon:"🔴"},
+      none:{label:labels.none || "None / Unclear",dot:"gray",badge:"badge-gray",icon:"⚪"}
+    };
+    return map[value] || map.none;
+  }
+
+  function modeLabel(mode){
+    return mode==="new" ? "New Contact" : mode==="followup" ? "Follow-Up" : "Call Blitz";
+  }
+  function reportMode(r){return r.isPDC ? "followup" : r.mode;}
+  function reportable(r){return r.isPDC ? r.reviewOptOut!==true : r.dailyReview!==false;}
+
+  function updateLocationField(){
+    const market=$("market");
+    const label=$("locationLabel");
+    const input=$("location");
+    const combo=input ? input.closest(".combo") : null;
+    const toggle=combo ? combo.querySelector(".combo-toggle") : null;
+    if(!market || !label || !input) return;
+
+    const value=market.value;
+    if(value==="us"){
+      label.textContent="State";
+      input.placeholder="Type or select state";
+      input.disabled=false;
+      if(toggle) toggle.disabled=false;
+    }else if(value==="canada"){
+      label.textContent="Province";
+      input.placeholder="Type or select province";
+      input.disabled=false;
+      if(toggle) toggle.disabled=false;
+    }else if(value==="international"){
+      label.textContent="Country";
+      input.placeholder="Type country or select";
+      input.disabled=false;
+      if(toggle) toggle.disabled=false;
+    }else{
+      label.textContent="State / Province / Country";
+      input.placeholder="Select country first";
+      input.disabled=true;
+      if(toggle) toggle.disabled=true;
+    }
+    if(combo && combo.classList.contains("open")) renderCombo(combo,true);
+  }
+
+  function locationFieldLabel(market){
+    if(market==="us") return "State";
+    if(market==="canada") return "Province";
+    if(market==="international") return "Country";
+    return "Location";
+  }
+
+  function normalizeZoneKey(zone){
+    if(!zone) return "";
+    return LEGACY_ZONE_MAP[zone] || zone;
+  }
+
+  function prospectTimezone(){
+    const override=$("taskTimezoneOverride")?.value || "";
+    if(override) return override;
+    const market=$("market")?.value || "";
+    const loc=$("location")?.value.trim() || "";
+    if(market==="us") return US_STATE_TZ[loc] || "";
+    if(market==="canada") return CANADA_PROVINCE_TZ[loc] || "";
+    if(market==="international") return "INTL";
+    return "";
+  }
+
+  function dateForTimeZoneCalculation(){
+    const raw=$("taskTimezoneDate")?.value || "";
+    if(raw) return new Date(`${raw}T12:00:00Z`);
+    return new Date();
+  }
+
+  function offsetMinutesForZone(zoneKey,date){
+    const normalized=normalizeZoneKey(zoneKey);
+    if(!normalized) return null;
+    if(Object.prototype.hasOwnProperty.call(FIXED_ZONE_OFFSETS,normalized)){
+      return FIXED_ZONE_OFFSETS[normalized];
+    }
+    try{
+      const parts=new Intl.DateTimeFormat("en-US",{
+        timeZone:normalized,
+        timeZoneName:"longOffset",
+        year:"numeric",month:"2-digit",day:"2-digit",
+        hour:"2-digit",minute:"2-digit",hourCycle:"h23"
+      }).formatToParts(date);
+      const name=parts.find(p=>p.type==="timeZoneName")?.value || "";
+      const match=name.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+      if(!match){
+        if(name==="GMT" || name==="UTC") return 0;
+        return null;
+      }
+      const sign=match[1]==="+" ? 1 : -1;
+      return sign*(Number(match[2])*60+Number(match[3]||0));
+    }catch(e){
+      return null;
+    }
+  }
+
+  function formatRelativeOffset(hours){
+    if(Math.abs(hours)<0.001) return "-0";
+    const rounded=Math.round(hours*2)/2;
+    const abs=Math.abs(rounded);
+    const formatted=Number.isInteger(abs)?String(abs):abs.toFixed(1);
+    return `${rounded>0?"+":"-"}${formatted}`;
+  }
+
+  function timezoneToken(){
+    const zone=prospectTimezone(), f=settings.taskFormat||{};
+    if(!zone) return "";
+    if(zone==="INTL") return f.internationalCode||"INTL";
+    const date=dateForTimeZoneCalculation();
+    const advisorOffset=offsetMinutesForZone(f.advisorTimezone||"ET",date);
+    const prospectOffset=offsetMinutesForZone(zone,date);
+    if(advisorOffset===null || prospectOffset===null) return "";
+    return formatRelativeOffset((prospectOffset-advisorOffset)/60);
+  }
+
+  function updateTimezoneExplanation(){
+    const el=$("taskTimezoneExplanation");
+    if(!el) return;
+    const zone=prospectTimezone();
+    if(!zone){
+      el.textContent="Uses the selected date so daylight-saving differences are calculated correctly.";
+      return;
+    }
+    if(zone==="INTL"){
+      el.textContent="International uses your configured label; choose a manual override if a numeric offset is needed.";
+      return;
+    }
+    const date=dateForTimeZoneCalculation();
+    const f=settings.taskFormat||{};
+    const advisorOffset=offsetMinutesForZone(f.advisorTimezone||"ET",date);
+    const prospectOffset=offsetMinutesForZone(zone,date);
+    if(advisorOffset===null || prospectOffset===null){
+      el.textContent="Time-zone difference could not be calculated; choose an override.";
+      return;
+    }
+    const diff=(prospectOffset-advisorOffset)/60;
+    const amount=Math.abs(diff);
+    el.textContent=`Calculated for ${date.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})}: ${formatRelativeOffset(diff)} hour${amount===1?"":"s"} relative to your home time.`;
+  }
+
+  function intakeTaskToken(){
+    const month=shortIntakeMonth($("intakeMonth")?.value||"");
+    const year=$("intakeYear")?.value||"";
+    return `${month}${year?year.slice(-2):""}`.trim();
+  }
+  function buildTaskSubject(example=false){
+    const f=settings.taskFormat||{};
+    const current=example?1:Math.max(0,parseInt($("currentCallNumber")?.value||"0",10)||0);
+    const tz=example?"-0":timezoneToken(), intake=example?"Jan27":intakeTaskToken();
+    const note=example?"Check if ready to apply":($("taskNote")?.value.trim()||"");
+    const parts=[];
+    if(f.includeTimezone&&tz) parts.push(f.timezoneBrackets?`(${tz})`:tz);
+    if(f.includeCall) parts.push(`${f.callWord||"Call"} ${current+1}`);
+    if(f.includeIntake&&intake) parts.push(f.intakeBrackets?`(${intake})`:intake);
+    let subject=parts.join(" ").trim();
+    if(f.includeNote&&note) subject+=`${subject?(f.separator??" - "):""}${note}`;
+    return subject.trim();
+  }
+  function updateTaskControlVisibility(){
+    const f=settings.taskFormat||{};
+    if($("taskTimezoneField")) $("taskTimezoneField").classList.toggle("task-hidden",!f.includeTimezone);
+    if($("taskCallField")) $("taskCallField").classList.toggle("task-hidden",!f.includeCall);
+    if($("taskNoteField")) $("taskNoteField").classList.toggle("task-hidden",!f.includeNote);
+  }
+
+  function updateTaskSubject(){
+    updateTaskControlVisibility();
+    if($("taskSubjectOutput")) $("taskSubjectOutput").value=buildTaskSubject(false);
+    if($("taskFormatPreview")) $("taskFormatPreview").textContent=buildTaskSubject(true);
+    updateTimezoneExplanation();
+  }
+  function updateTimezoneOverrideHint(){
+    if(!$("taskTimezoneOverride")) return;
+    const loc=$("location")?.value.trim()||"";
+    $("taskTimezoneOverride").title=MULTI_TZ_LOCATIONS.has(loc)?"This state/province can contain more than one time practice. Confirm the prospect's location and override when needed.":"Auto uses the selected state/province and the time-zone date.";
+  }
+
+  function shortIntakeMonth(month){
+    const map={January:"Jan",May:"May",September:"Sep"};
+    return map[month] || month || "";
+  }
+
+  function intakeDisplay(record){
+    return [shortIntakeMonth(record.intakeMonth),record.intakeYear].filter(Boolean).join(" ");
+  }
+
+  function populateStatusDropdown(selectedValue){
+    const current = selectedValue !== undefined ? selectedValue : ($("status").value || "");
+    const options = [
+      ["applying", statusMeta("applying").label],
+      ["followup", statusMeta("followup").label],
+      ["notprogressing", statusMeta("notprogressing").label],
+      ["none", statusMeta("none").label]
+    ];
+    $("status").innerHTML = `<option value="">Select status</option>` + options.map(([value,label])=>`<option value="${value}">${esc(label)}</option>`).join("");
+    $("status").value = options.some(([value])=>value===current) ? current : "";
+  }
+
+  let captureDepth="quick";
+  function getCaptureDepth(){return captureDepth;}
+  function setCaptureDepth(depth,{preserveOutcome=false}={}){
+    captureDepth=["quick","short","full"].includes(depth)?depth:"full";
+    document.querySelectorAll(".capture-mode-switch button").forEach(btn=>{
+      const active=btn.dataset.depth===captureDepth;
+      btn.classList.toggle("active",active);
+      btn.setAttribute("aria-pressed",String(active));
+    });
+    $("interactionForm").dataset.depth=captureDepth;
+    $("academicContext").hidden=captureDepth!=="full";
+    $("programIntake").hidden=captureDepth==="quick";
+    document.querySelectorAll("[data-full-basics]").forEach(el=>el.hidden=captureDepth==="quick");
+    $("nextStepsField").hidden=captureDepth==="quick";
+    $("nameRequiredMark").hidden=captureDepth==="quick";
+    $("name").required=captureDepth!=="quick";
+    $("name").placeholder=captureDepth==="quick"?"Optional name":"Enter name";
+    $("conversationTitle").textContent=captureDepth==="quick"?"Optional call note":"Conversation";
+    $("summaryLabel").textContent=captureDepth==="quick"?"Notes (optional)":"Call Summary / Notes";
+    $("summary").placeholder=captureDepth==="quick"?"Optional note, e.g. left voicemail":"Write a concise summary of the conversation...";
+    $("conversationHelp").hidden=captureDepth==="quick";
+    $("captureModeHelp").textContent={
+      quick:"Record an unanswered attempt in seconds.",
+      short:"Brief answered call — no academic intake required.",
+      full:"Complete academic and advising details."
+    }[captureDepth];
+    if(!preserveOutcome){
+      if(captureDepth==="quick" && (!$("callOutcome").value || $("callOutcome").value==="answered"))$("callOutcome").value="no_response";
+      if(captureDepth!=="quick" && (!$("callOutcome").value || $("callOutcome").value==="no_response"))$("callOutcome").value="answered";
+    }
+    updateOutcomeOptions();
+    updateStatusAvailability();
+    updateProfileSummary();
+  }
+
+  function getMode(){
+    const active = document.querySelector(".mode-switch button.active");
+    return active ? active.dataset.mode : "new";
+  }
+
+  function setMode(mode){
+    document.querySelectorAll(".mode-switch button").forEach(btn=>{
+      btn.classList.toggle("active", btn.dataset.mode===mode);
+    });
+    const calendly=$("isCalendly");
+    if(calendly){
+      if(mode==="blitz"){
+        calendly.checked=false;
+        calendly.disabled=true;
+      }else{
+        calendly.disabled=false;
+      }
+    }
+    updateInteractionFlags();
+  }
+
+  function advisorInitials(name){
+    const parts = String(name||"").trim().split(/\s+/).filter(Boolean);
+    if(!parts.length) return "AD";
+    if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  }
+
+  function updateAdvisorAccount(){
+    const full=(settings.advisorName||"").trim();
+    const first=full ? full.split(/\s+/)[0] : "Advisor";
+    if($("advisorFirstName")) $("advisorFirstName").textContent=first;
+    if($("advisorAccount")) $("advisorAccount").title=full || "Advisor";
+    if($("advisorDisplay")) $("advisorDisplay").textContent=full || "Advisor";
+  }
+
+  function applyTheme(){
+    const theme = THEMES[settings.theme] || THEMES.saba;
+    const dark=settings.appearance==="dark";
+    const palette={
+      "--brand":theme.brand,
+      "--brand-strong":theme.strong,
+      "--brand-accent":theme.accent,
+      "--brand-pale":theme.pale,
+      "--brand-soft":dark?theme.darkSoft:theme.soft,
+      "--brand-ink":dark?theme.darkInk:theme.ink,
+      "--brand-border":dark?theme.darkBorder:`color-mix(in srgb, ${theme.brand} 23%, #dae1e7)`,
+      "--brand-glow":dark?`color-mix(in srgb, ${theme.accent} 12%, transparent)`:`color-mix(in srgb, ${theme.accent} 9%, transparent)`
+    };
+    for(const [key,value] of Object.entries(palette))document.documentElement.style.setProperty(key,value);
+    document.body.classList.toggle("dark",dark);
+    document.body.dataset.schoolTheme=settings.theme in THEMES?settings.theme:"saba";
+    $("appearanceBtn").textContent = settings.appearance==="dark" ? "☀ Light" : "🌙 Dark";
+    $("schoolTag").textContent = theme.label;
+    $("advisorDisplay").textContent = settings.advisorName ? settings.advisorName : "Advisor";
+    if($("advisorFirstName")){
+      const fullAdvisor=($("advisorDisplay").textContent||"Advisor").trim();
+      $("advisorFirstName").textContent=fullAdvisor && fullAdvisor!=="Advisor" ? fullAdvisor.split(/\s+/)[0] : "Advisor";
+      $("advisorAccount").title=fullAdvisor || "Advisor";
+    }
+    document.querySelectorAll(".theme-card").forEach(card=>{
+      card.classList.toggle("active", card.dataset.theme===settings.theme);
+      card.setAttribute("aria-pressed",String(card.dataset.theme===settings.theme));
+    });
+    populateStatusDropdown();
+    if($("program") && !$("program").value.trim()) $("program").value="Doctor of Medicine";
+    const programCombo=document.querySelector('.combo[data-combo="program"]');
+    if(programCombo && programCombo.classList.contains("open")) renderCombo(programCombo,true);
+  }
+
+  function prereqAssessment(){
+    return document.querySelector('input[name="prereqAssessment"]:checked')?.value||"unassessed";
+  }
+  function missingPrereqs(){
+    return Array.from(document.querySelectorAll('#prereqGrid input[type="checkbox"]:checked')).map(cb=>cb.value);
+  }
+  function allPrereqValues(){
+    return Array.from(document.querySelectorAll('#prereqGrid input[type="checkbox"]')).map(cb=>cb.value);
+  }
+  function setPrereqAssessment(mode,missing=[]){
+    const m=["all","missing"].includes(mode)?mode:"unassessed";
+    const radio=document.querySelector(`input[name="prereqAssessment"][value="${m}"]`);
+    if(radio)radio.checked=true;
+    const chosen=new Set(missing);
+    document.querySelectorAll('#prereqGrid input[type="checkbox"]').forEach(cb=>cb.checked=m==="missing"&&chosen.has(cb.value));
+    $("prereqGrid").hidden=m!=="missing";
+  }
+  function prereqForRecord(r){
+    if(r.prereqAssessment)return {assessment:r.prereqAssessment,missing:r.missingPrerequisites||[]};
+    const completed=Array.isArray(r.prerequisites)?r.prerequisites:[];
+    if(!completed.length)return {assessment:"unassessed",missing:[]};
+    const missing=allPrereqValues().filter(v=>!completed.includes(v));
+    return {assessment:missing.length?"missing":"all",missing};
+  }
+
+  // The first academic / MCAT fields retain their v30 IDs. Added entries are stored
+  // as arrays; older records without arrays load as one academic entry and one MCAT.
+  let academicEntrySerial=1,mcatEntrySerial=1;
+  function academicEntriesFromForm(){
+    return Array.from(document.querySelectorAll('[data-academic-row]')).map(row=>({
+      degreeSchool:(row.querySelector('[data-academic-degree]')||row.querySelector('#degreeSchool'))?.value.trim()||'',
+      gradDate:(row.querySelector('[data-academic-grad]')||row.querySelector('#gradDate'))?.value.trim()||'',
+      gpa:(row.querySelector('[data-academic-gpa]')||row.querySelector('#gpa'))?.value.trim()||''
+    })).filter(a=>a.degreeSchool||a.gradDate||a.gpa);
+  }
+  function mcatScoresFromForm(){
+    return Array.from(document.querySelectorAll('[data-mcat-row]')).map(row=>(row.querySelector('[data-mcat-score]')||row.querySelector('#mcat'))?.value.trim()||'').filter(Boolean);
+  }
+  function existingAcademicEntries(record){
+    return Array.isArray(record.academicEntries)?record.academicEntries:
+      [{degreeSchool:record.degreeSchool||'',gradDate:record.gradDate||'',gpa:record.gpa||''}];
+  }
+  function existingMcatScores(record){
+    return Array.isArray(record.mcatScores)?record.mcatScores:[record.mcat||''];
+  }
+  function addAcademicEntry(entry={}){
+    const host=$('academicRows');
+    if(host.querySelectorAll('[data-academic-row]').length>=12)return;
+    const n=++academicEntrySerial;
+    const row=document.createElement('div');row.className='academic-repeat-row is-extra';row.dataset.academicRow='';
+    row.innerHTML=`<div class="academic-extra-header"><span>Additional academic entry</span><button type="button" class="entry-remove" aria-label="Remove academic entry" title="Remove academic entry">Remove ×</button></div>
+      <div class="academic-row-fields">
+        <div class="field"><label for="academicDegree${n}">Degree / Name of School</label><input id="academicDegree${n}" data-academic-degree autocomplete="off"></div>
+        <div class="field"><label for="academicGrad${n}">Graduation Date</label><input id="academicGrad${n}" data-academic-grad autocomplete="off"></div>
+        <div class="field"><label for="academicGpa${n}">GPA</label><input id="academicGpa${n}" data-academic-gpa inputmode="decimal" autocomplete="off"></div>
+      </div>`;
+    row.querySelector('[data-academic-degree]').value=entry.degreeSchool||'';
+    row.querySelector('[data-academic-grad]').value=entry.gradDate||'';
+    row.querySelector('[data-academic-gpa]').value=entry.gpa||'';
+    host.appendChild(row);updateEntryButtons();return row;
+  }
+  function addMcatScore(score=''){
+    const host=$('mcatRows');
+    if(host.querySelectorAll('[data-mcat-row]').length>=12)return;
+    const n=++mcatEntrySerial;
+    const row=document.createElement('div');row.className='mcat-repeat-row is-extra';row.dataset.mcatRow='';
+    row.innerHTML=`<div class="academic-extra-header"><span>Additional MCAT</span><button type="button" class="entry-remove" aria-label="Remove MCAT score" title="Remove MCAT score">Remove ×</button></div>
+      <div class="field"><label for="mcatScore${n}">MCAT Score</label><input id="mcatScore${n}" data-mcat-score inputmode="numeric" autocomplete="off"></div>`;
+    row.querySelector('[data-mcat-score]').value=score||'';
+    host.appendChild(row);updateEntryButtons();return row;
+  }
+  function updateEntryButtons(){
+    $('addAcademicBtn').disabled=$('academicRows').querySelectorAll('[data-academic-row]').length>=12;
+    $('addMcatBtn').disabled=$('mcatRows').querySelectorAll('[data-mcat-row]').length>=12;
+  }
+  function clearRepeatEntries(){
+    document.querySelectorAll('.academic-repeat-row.is-extra,.mcat-repeat-row.is-extra').forEach(row=>row.remove());
+    updateEntryButtons();
+  }
+  function restoreAcademicLists(academics=[],mcats=[]){
+    clearRepeatEntries();
+    const first=academics[0]||{};
+    $('degreeSchool').value=first.degreeSchool||'';$('gradDate').value=first.gradDate||'';$('gpa').value=first.gpa||'';
+    $('mcat').value=mcats[0]||'';
+    academics.slice(1,12).forEach(addAcademicEntry);
+    mcats.slice(1,12).forEach(addMcatScore);
+    updateProfileSummary();
+  }
+  function registerAcademicChange(){updateProfileSummary();enableSaveForNextCall();setDirty(true);persistDraft();}
+
+  function profileSentences(data){
+    const parts=[];
+    const intake=[shortIntakeMonth(data.intakeMonth||""),data.intakeYear||""].filter(Boolean).join(" ");
+    if(data.program && intake)parts.push(`Interested in ${data.program} for ${intake}.`);
+    else if(data.program)parts.push(`Interested in ${data.program}.`);
+    else if(intake)parts.push(`Intended intake: ${intake}.`);
+    const academics=Array.isArray(data.academicEntries)?data.academicEntries:[{degreeSchool:data.degreeSchool||'',gradDate:data.gradDate||'',gpa:data.gpa||''}];
+    const academicPhrases=academics.filter(a=>a.degreeSchool||a.gradDate||a.gpa).map(a=>{
+      const details=[];
+      if(a.gradDate)details.push(`graduation: ${a.gradDate}`);
+      if(a.gpa)details.push(`GPA: ${a.gpa}`);
+      return a.degreeSchool ? `${a.degreeSchool}${details.length?` (${details.join(', ')})`:''}` : details.join(', ');
+    });
+    if(academicPhrases.length)parts.push(`Academic background: ${academicPhrases.join('; ')}.`);
+    const attempts=Array.isArray(data.mcatScores)?data.mcatScores:[data.mcat||''];
+    const scores=attempts.filter(Boolean);
+    if(scores.length)parts.push(`${scores.length>1?'MCAT scores':'MCAT'}: ${scores.join(', ')}.`);
+    if(data.prereqAssessment==="all")parts.push("All prerequisites completed.");
+    else if(data.prereqAssessment==="missing"){
+      if((data.missingPrerequisites||[]).length)parts.push(`Missing prerequisites: ${data.missingPrerequisites.join(", ")}.`);
+    } else if(data.prereqAssessment==="unassessed")parts.push("Prerequisites not yet assessed.");
+    return parts.join(" ");
+  }
+  let profileWasEdited=false;
+  function liveProfileData(){return {
+    program:$("program").value.trim(),intakeMonth:$("intakeMonth").value,intakeYear:$("intakeYear").value,
+    academicEntries:academicEntriesFromForm(),mcatScores:mcatScoresFromForm(),
+    degreeSchool:$("degreeSchool").value.trim(),gradDate:$("gradDate").value.trim(),gpa:$("gpa").value.trim(),mcat:$("mcat").value.trim(),
+    prereqAssessment:prereqAssessment(),missingPrerequisites:missingPrereqs()
+  };}
+  function updateProfileSummary(force=false){
+    const panel=$("profileSummaryPanel");
+    const enabled=getCaptureDepth()==="full"&&$("includeProfileDetails").checked;
+    panel.hidden=!enabled;
+    $("profileSummaryToggle").hidden=getCaptureDepth()!=="full";
+    if(!enabled)return;
+    if(force||!profileWasEdited){
+      $("generatedProfile").value=profileSentences(liveProfileData());
+      profileWasEdited=false;
+      $("profileSummaryHint").textContent="Updates from the form until you edit these details. Refresh details to regenerate.";
+    }else{$("profileSummaryHint").textContent="Customized details preserved. Refresh details to regenerate from academic fields.";}
+  }
+  function combinedSummary(manual,generated,enabled){
+    return [enabled?String(generated||"").trim():"",String(manual||"").trim()].filter(Boolean).join(" ").trim();
+  }
+  function summaryForRecord(r){
+    return combinedSummary(r.summary,r.generatedProfile,r.includeProfileDetails===true);
+  }
+  function currentCombinedSummary(){
+    return combinedSummary($("summary").value,$("generatedProfile").value,getCaptureDepth()==="full"&&$("includeProfileDetails").checked);
+  }
+
+  function graduationYear(value){
+    if(!value) return "";
+    const match=String(value).match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : String(value).trim();
+  }
+
+  function collectRecord(){
+    const depth=getCaptureDepth();
+    if(depth!=="quick" && !$("name").value.trim())return saveError("enter a name",$("name"));
+    if(depth!=="quick" && !$("program").value.trim())return saveError("enter a program",$("program"));
+    if(!$("callOutcome").value)return saveError("select Call Outcome",$("callOutcome"));
+    if(depth==="quick" && $("callOutcome").value==="answered")return saveError("choose Short Call or Full Intake for answered calls",$("callOutcome"));
+    const answered=$("callOutcome").value==="answered";
+    if(answered && depth!=="quick" && !$("status").value){
+      return saveError("select Status for an answered call",$("status"));
+    }
+    if(answered && depth!=="quick" && !currentCombinedSummary()){
+      return saveError("add Call Summary / Notes",$("summary"));
+    }
+    if(answered && depth!=="quick" && !$("nextSteps").value.trim()){
+      return saveError("add Next Steps",$("nextSteps"));
+    }
+    if(!answered) $("status").value="";
+    const existingId = $("recordId").value;
+    const old = existingId ? records.find(r=>r.id===existingId) : null;
+
+    return {
+      id: existingId || makeId(),
+      date: localDateKey(),
+      createdAt: old ? old.createdAt : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      mode:getMode(),
+      callDepth:depth,
+      name:$("name").value.trim(),
+      market:$("market").value,
+      location:$("location").value.trim(),
+      leadSource:$("leadSource").value.trim(),
+      program:$("program").value.trim(),
+      intakeMonth:$("intakeMonth").value.trim(),
+      intakeYear:$("intakeYear").value.trim(),
+      gradDate:$("gradDate").value,
+      degreeSchool:$("degreeSchool").value.trim(),
+      gpa:$("gpa").value.trim(),
+      mcat:$("mcat").value.trim(),
+      academicEntries:academicEntriesFromForm(),
+      mcatScores:mcatScoresFromForm(),
+      prereqAssessment:prereqAssessment(),
+      missingPrerequisites:prereqAssessment()==="missing"?missingPrereqs():[],
+      prerequisites:prereqAssessment()==="all"?allPrereqValues():prereqAssessment()==="missing"?allPrereqValues().filter(v=>!missingPrereqs().includes(v)):[],
+      experience:$("experience").value.trim(),
+      isCalendly:$("isCalendly").checked && getMode()!=="blitz",
+      isSQL:$("isSQL").checked && getMode()!=="blitz",
+      isPDC:$("isPDC").checked,
+      callOutcome:$("callOutcome").value,
+      status:$("status").value,
+      summary:$("summary").value.trim(),
+      generatedProfile:depth==="full"?$("generatedProfile").value.trim():"",
+      includeProfileDetails:depth==="full" && $("includeProfileDetails").checked,
+      profileWasEdited:depth==="full" && profileWasEdited,
+      nextSteps:$("nextSteps").value.trim(),
+      currentCallNumber:Math.max(0,parseInt($("currentCallNumber").value||"0",10)||0),
+      dailyReview:$("dailyReview").checked,
+      reviewOptOut:!$("dailyReview").checked
+    };
+  }
+
+  function clearForm({depth="quick",category="new"}={}){
+    $("interactionForm").reset();
+    $("recordId").value="";
+    $("market").value="";
+    $("location").value="";
+    updateLocationField();
+    $("intakeYear").value="2027";
+    $("program").value="Doctor of Medicine";
+    populateStatusDropdown("");
+    $("dailyReview").checked=true;
+    $("isCalendly").checked=false;
+    $("isSQL").checked=false;
+    $("isPDC").checked=false;
+    $("callOutcome").value="";
+    $("currentCallNumber").value="1";
+    $("taskTimezoneOverride").value="";
+    $("taskTimezoneDate").value=localDateKey();
+    $("taskNote").value="";
+    clearRepeatEntries();
+    setPrereqAssessment("unassessed");
+    profileWasEdited=false;
+    $("generatedProfile").value="";
+    $("includeProfileDetails").checked=true;
+    setMode(category);
+    setCaptureDepth(depth);
+    updateOutcomeOptions();
+    updateStatusAvailability();
+    updateTaskSubject();
+    $("formTitle").textContent="Intake Interaction Form";
+    setDirty(false);
+  }
+
+  function editRecord(id){
+    if(!confirmDiscard())return;
+    enableSaveForNextCall();
+    const r = records.find(x=>x.id===id);
+    if(!r) return;
+
+    $("recordId").value=r.id;
+    $("name").value=r.name||"";
+    $("market").value=r.market||"";
+    updateLocationField();
+    $("location").value=r.location||"";
+    $("leadSource").value=r.leadSource||"";
+    $("program").value=r.program||"";
+    $("intakeMonth").value=r.intakeMonth||"";
+    $("intakeYear").value=r.intakeYear??"2027";
+    restoreAcademicLists(existingAcademicEntries(r),existingMcatScores(r));
+    const oldPrereqs=prereqForRecord(r);
+    setPrereqAssessment(oldPrereqs.assessment,oldPrereqs.missing);
+    $("experience").value=r.experience||"";
+    $("isCalendly").checked=Boolean(r.isCalendly) && (r.mode||"new")!=="blitz";
+    $("isSQL").checked=Boolean(r.isSQL);
+    $("isPDC").checked=Boolean(r.isPDC);
+    updateInteractionFlags();
+    updateOutcomeOptions();
+    $("callOutcome").value=r.callOutcome||"";
+    populateStatusDropdown(r.status||"");
+    updateStatusAvailability();
+    if(r.callOutcome==="answered" && r.status) $("status").value=r.status;
+    $("summary").value=r.summary||"";
+    $("includeProfileDetails").checked=Boolean(r.includeProfileDetails);
+    $("generatedProfile").value=r.generatedProfile||"";
+    profileWasEdited=typeof r.profileWasEdited==='boolean'?r.profileWasEdited:Boolean(r.includeProfileDetails);
+    $("nextSteps").value=r.nextSteps||"";
+    $("currentCallNumber").value=(r.currentCallNumber??1);
+    $("taskTimezoneOverride").value="";
+    $("taskTimezoneDate").value=localDateKey();
+    $("taskNote").value=r.nextSteps||"";
+    updateTaskSubject();
+    $("dailyReview").checked=reportable(r);
+    setMode(r.isPDC?"followup":r.mode||"new");
+    setCaptureDepth(r.callDepth || (r.callOutcome==="answered"?"full":"quick"),{preserveOutcome:true});
+    updateInteractionFlags();
+    $("formTitle").textContent="Intake Interaction Form";
+    setDirty(false);
+    formNotice("Editing saved interaction — save changes when finished","saved");
+    updateRecentNavigation();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function todayRecords(){
+    return records.filter(r=>r.date===localDateKey()).sort((a,b)=>
+      (b.updatedAt||b.createdAt||"").localeCompare(a.updatedAt||a.createdAt||"") ||
+      (b.createdAt||"").localeCompare(a.createdAt||""));
+  }
+
+  function isConnected(r){
+    return r.callOutcome==="answered";
+  }
+
+  function renderActivity(){
+    const query = $("searchActivity").value.trim().toLowerCase();
+    const all = todayRecords();
+    const filtered = all.filter(r=>{
+      const text = `${r.name||""} ${r.leadSource||""} ${r.program||""} ${summaryForRecord(r)}`.toLowerCase();
+      return !query || text.includes(query);
+    });
+
+    $("activityCount").textContent = `${all.length} interaction${all.length===1?"":"s"} saved`;
+
+    if(!filtered.length){
+      $("activityList").innerHTML = `<div class="empty">No matching interactions saved today.</div>`;
+      return;
+    }
+
+    $("activityList").innerHTML = filtered.map(r=>{
+      const s = r.callOutcome==="answered" ? statusMeta(r.status) : statusMeta("none");
+      const intake = intakeDisplay(r);
+      const time = new Date(r.updatedAt||r.createdAt||Date.now()).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+      return `
+        <div class="activity" data-id="${esc(r.id)}">
+          <span class="dot ${s.dot}"></span>
+          <div>
+            <strong>${esc(r.name||"Unnamed attempt")}</strong>
+            <div class="sub">${r.callDepth?`${esc({quick:"Quick Log",short:"Short Call",full:"Full Intake"}[r.callDepth]||"")} · `:""}${esc(modeLabel(reportMode(r)))}${r.isPDC?` · PDC`:""}${r.isSQL?` · SQL Incoming`:""}${r.isCalendly?` · Calendly`:""}${r.callOutcome?` · ${esc(outcomeLabel(r.callOutcome))}`:""}${r.leadSource?` · ${esc(r.leadSource)}`:""}${intake?` · ${esc(intake)}`:""} — ${esc(summaryForRecord(r))}</div>
+          </div>
+          <div class="meta">
+            <div>${esc(time)}</div>
+          </div>
+        </div>`;
+    }).join("");
+
+    document.querySelectorAll(".activity").forEach(el=>{
+      el.addEventListener("click",()=>navigateToSaved(el.dataset.id));
+    });
+  }
+
+  function reportProgramAbbreviation(program){
+    const map={
+      "Doctor of Medicine":"MD",
+      "Doctor of Veterinary Medicine":"DVM",
+      "Pre-Medical Master's":"PMM",
+      "Pre-Med Master's":"PMM",
+      "Pre-Medical Masters":"PMM",
+      "Pre-Vet Master's":"PVM",
+      "Pre-Vet Masters":"PVM",
+      "Pre-Veterinary Master's":"PVM",
+      "Pre-Veterinary Masters":"PVM",
+      "Gateway Medical Program":"GMP",
+      "Gateway Medical":"GMP",
+      "Gateway Veterinary Program":"GVP",
+      "Gateway Veterinary":"GVP",
+      "Pre-Med 5-Year":"5-Year",
+      "Pre-Med 6-Year":"6-Year",
+      "MBBS to MD":"MBBS-MD",
+      "General Inquiry":"General"
+    };
+    return map[program] || program || "";
+  }
+
+  function reportMetaParts(r){
+    const parts=[];
+    parts.push({text:r.name||"Unnamed contact",kind:"name"});
+    if(r.leadSource)parts.push({text:r.leadSource,kind:"source"});
+    const intake=intakeDisplay(r);
+    if(intake)parts.push({text:intake,kind:"intake"});
+    if(settings.reportIncludeProgram && r.program){
+      const short=reportProgramAbbreviation(r.program);
+      if(short)parts.push({text:`(${short})`,kind:"program"});
+    }
+    return parts;
+  }
+
+  function reportPlainIdentity(r){
+    return reportMetaParts(r).map(p=>p.text).join(" · ");
+  }
+
+  function reportRichIdentity(r){
+    return reportMetaParts(r).map(p=>`<strong>${esc(p.text)}</strong>`).join(" · ");
+  }
+
+  function renderReport(){
+    const all = todayRecords().filter(reportable);
+    const newItems = all.filter(r=>reportMode(r)==="new");
+    const followItems = all.filter(r=>reportMode(r)==="followup");
+    const blitzItems = all.filter(r=>reportMode(r)==="blitz");
+
+    const connectedNew = newItems.filter(isConnected).length;
+    const connectedFollow = followItems.filter(isConnected).length;
+    const connectedBlitz = blitzItems.filter(isConnected).length;
+    const connected = connectedNew + connectedFollow + connectedBlitz;
+
+    const pct = (n,d)=> d ? Math.round((n/d)*100) : 0;
+    const overallRate = pct(connected, all.length);
+    const newRate = pct(connectedNew, newItems.length);
+    const followRate = pct(connectedFollow, followItems.length);
+    const blitzRate = pct(connectedBlitz, blitzItems.length);
+
+    const calendlyItems = all.filter(r=>r.isCalendly && r.mode!=="blitz");
+    const calendlyConnected = calendlyItems.filter(isConnected).length;
+    const calendlyShowRate = pct(calendlyConnected, calendlyItems.length);
+    const sqlItems=all.filter(r=>r.isSQL && r.mode!=="blitz");
+    const sqlAnswered=sqlItems.filter(isConnected).length;
+    const sqlRate=pct(sqlAnswered,sqlItems.length);
+
+    function renderCase(r){
+      const status = r.callOutcome==="answered" ? statusMeta(r.status) : statusMeta("none");
+      const meta = reportMetaParts(r).map(p=>`<span class="report-meta-bold">${esc(p.text)}</span>`).join("<span> · </span>");
+      return `<div class="case"><div class="identity" style="align-items:baseline">
+        <span class="report-status-dot dot ${status.dot}" role="img" aria-label="${esc(status.label)}"></span>
+        ${meta}${r.isSQL?` <span class="sql-marker">SQL</span>`:""}
+        <span>—</span>
+        <span>${esc(summaryForRecord(r))}${r.nextSteps?` <strong>Next:</strong> ${esc(r.nextSteps)}`:""}</span>
+      </div></div>`;
+    }
+
+    function section(title,items){
+      if(!items.length)return "";
+      return `<h4 style="margin-top:12px">${title}</h4>${items.map(renderCase).join("")}`;
+    }
+
+    const observations=$("dailyObservations").value.trim();
+    $("dailyGlance").innerHTML=`
+      <div class="glance-row"><strong>Total Calls:</strong> ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})</div>
+      <div class="glance-row"><strong>Connected Calls:</strong> ${connected} | <strong>Overall Connect Rate:</strong> ${overallRate}%</div>
+      <div class="glance-row"><strong>Calendly:</strong> ${calendlyItems.length} | Shows: ${calendlyConnected} | Show Rate: ${calendlyShowRate}%</div>
+      <div class="glance-row"><strong>SQL Incoming:</strong> ${sqlItems.length} | Answered: ${sqlAnswered} | Connect Rate: ${sqlRate}%</div>`;
+
+    $("report").innerHTML=`
+      <div style="font-weight:850;margin-bottom:9px"><strong>ADVISOR DAILY REPORT — ${esc(todayLabel())}</strong></div>
+      <h4>Call Activity</h4>
+      <div class="metrics">
+        <div>Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})</div>
+        <div>Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})</div>
+        <div>Overall Connect Rate: ${overallRate}% (New Contact: ${newRate}% | Follow-Up: ${followRate}%${blitzItems.length?` | Call Blitz: ${blitzRate}%`:""})</div>
+        <div>Calendly Show Rate: ${calendlyShowRate}% (Total Calendly Calls: ${calendlyItems.length})</div>
+        <div>SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${sqlRate}%)</div>
+      </div>
+      <h4>Connected Calls / Quality Summary</h4>
+      ${section("New Contacts",newItems.filter(isConnected))}
+      ${section("Follow-Ups",followItems.filter(isConnected))}
+      ${section("Call Blitz",blitzItems.filter(isConnected))}
+      ${!all.some(isConnected)?`<div style="color:var(--muted);margin-bottom:10px">No answered calls included in today's quality summary.</div>`:""}
+      ${observations?`<h4 style="margin-top:12px">Advisor Observations</h4><div class="metrics"><div>${esc(observations).replace(/\n/g,"<br>")}</div></div>`:""}`;
+
+    const inlineLegend=$("reportLegendInline");
+    inlineLegend.innerHTML=[
+      `<span class="legend-title">STATUS LEGEND — ANSWERED CALLS</span>`,
+      ...[["green","applying"],["yellow","followup"],["red","notprogressing"],["gray","none"]]
+        .map(([tone,key])=>`<span class="legend-item"><span class="dot ${tone}" aria-hidden="true"></span>${esc(statusMeta(key).label)}</span>`)
+    ].join("");
+    $("includeLegendQuick").checked=settings.includeLegend!==false;
+    $("report").scrollTop=0;
+  }
+
+  function reportText(){
+    const all=todayRecords().filter(reportable);
+    const newItems=all.filter(r=>reportMode(r)==="new");
+    const followItems=all.filter(r=>reportMode(r)==="followup");
+    const blitzItems=all.filter(r=>reportMode(r)==="blitz");
+    const connectedNew=newItems.filter(isConnected).length;
+    const connectedFollow=followItems.filter(isConnected).length;
+    const connectedBlitz=blitzItems.filter(isConnected).length;
+    const connected=connectedNew+connectedFollow+connectedBlitz;
+    const pct=(n,d)=>d?Math.round((n/d)*100):0;
+    const calendlyItems=all.filter(r=>r.isCalendly&&r.mode!=="blitz");
+    const calendlyConnected=calendlyItems.filter(isConnected).length;
+    const sqlItems=all.filter(r=>r.isSQL&&r.mode!=="blitz");
+    const sqlAnswered=sqlItems.filter(isConnected).length;
+
+    const lines=[
+      `ADVISOR DAILY REPORT — ${todayLabel()}`,"",
+      "CALL ACTIVITY",
+      `Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})`,
+      `Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})`,
+      `Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${blitzItems.length?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})`,
+      `Calendly Show Rate: ${pct(calendlyConnected,calendlyItems.length)}% (Total Calendly Calls: ${calendlyItems.length})`,
+      `SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${pct(sqlAnswered,sqlItems.length)}%)`,"",
+      "CONNECTED CALLS / QUALITY SUMMARY"
+    ];
+
+    const addSection=(title,items)=>{
+      if(!items.length)return;
+      lines.push("",title.toUpperCase());
+      items.forEach(r=>{
+        const st=statusMeta(r.status);
+        lines.push(`${st.icon} ${reportPlainIdentity(r)}${r.isSQL?" [SQL]":""} — ${summaryForRecord(r)}${r.nextSteps?` Next: ${r.nextSteps}`:""}`);
+      });
+    };
+    addSection("New Contacts",newItems.filter(isConnected));
+    addSection("Follow-Ups",followItems.filter(isConnected));
+    addSection("Call Blitz",blitzItems.filter(isConnected));
+
+    const obs=$("dailyObservations").value.trim();
+    if(obs)lines.push("","ADVISOR OBSERVATIONS",obs);
+
+    if(settings.includeLegend!==false){
+      lines.push("",
+        `STATUS LEGEND — ANSWERED CALLS: 🟢 ${statusMeta("applying").label} | 🟡 ${statusMeta("followup").label} | 🔴 ${statusMeta("notprogressing").label} | ⚪ ${statusMeta("none").label}`
+      );
+    }
+    return lines.join("\n");
+  }
+
+  function reportHtmlForClipboard(){
+    const all=todayRecords().filter(reportable);
+    const newItems=all.filter(r=>reportMode(r)==="new");
+    const followItems=all.filter(r=>reportMode(r)==="followup");
+    const blitzItems=all.filter(r=>reportMode(r)==="blitz");
+    const connectedNew=newItems.filter(isConnected).length;
+    const connectedFollow=followItems.filter(isConnected).length;
+    const connectedBlitz=blitzItems.filter(isConnected).length;
+    const connected=connectedNew+connectedFollow+connectedBlitz;
+    const pct=(n,d)=>d?Math.round((n/d)*100):0;
+    const calendlyItems=all.filter(r=>r.isCalendly&&r.mode!=="blitz");
+    const calendlyConnected=calendlyItems.filter(isConnected).length;
+    const sqlItems=all.filter(r=>r.isSQL&&r.mode!=="blitz");
+    const sqlAnswered=sqlItems.filter(isConnected).length;
+
+    const blocks=[];
+    blocks.push(`<div><strong>ADVISOR DAILY REPORT — ${esc(todayLabel())}</strong></div><br>`);
+    blocks.push(`<div><strong>CALL ACTIVITY</strong></div>`);
+    blocks.push(`<div>Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})</div>`);
+    blocks.push(`<div>Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})</div>`);
+    blocks.push(`<div>Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${blitzItems.length?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})</div>`);
+    blocks.push(`<div>Calendly Show Rate: ${pct(calendlyConnected,calendlyItems.length)}% (Total Calendly Calls: ${calendlyItems.length})</div>`);
+    blocks.push(`<div>SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${pct(sqlAnswered,sqlItems.length)}%)</div><br>`);
+    blocks.push(`<div><strong>CONNECTED CALLS / QUALITY SUMMARY</strong></div>`);
+
+    const addSection=(title,items)=>{
+      if(!items.length)return;
+      blocks.push(`<div style="margin-top:10px"><strong>${esc(title.toUpperCase())}</strong></div>`);
+      items.forEach(r=>{
+        const st=statusMeta(r.status);
+        blocks.push(`<div style="margin:0;line-height:1.35">${st.icon} ${reportRichIdentity(r)}${r.isSQL?" <strong>[SQL]</strong>":""} — ${esc(summaryForRecord(r))}${r.nextSteps?` <strong>Next:</strong> ${esc(r.nextSteps)}`:""}</div>`);
+      });
+    };
+    addSection("New Contacts",newItems.filter(isConnected));
+    addSection("Follow-Ups",followItems.filter(isConnected));
+    addSection("Call Blitz",blitzItems.filter(isConnected));
+
+    const obs=$("dailyObservations").value.trim();
+    if(obs)blocks.push(`<br><div><strong>ADVISOR OBSERVATIONS</strong></div><div>${esc(obs).replace(/\n/g,"<br>")}</div>`);
+    if(settings.includeLegend!==false){
+      blocks.push(`<br><div><strong>STATUS LEGEND — ANSWERED CALLS:</strong> 🟢 ${esc(statusMeta("applying").label)} &nbsp;|&nbsp; 🟡 ${esc(statusMeta("followup").label)} &nbsp;|&nbsp; 🔴 ${esc(statusMeta("notprogressing").label)} &nbsp;|&nbsp; ⚪ ${esc(statusMeta("none").label)}</div>`);
+    }
+    return `<div style="font-family:Arial,sans-serif;font-size:11pt;line-height:1.35">${blocks.join("")}</div>`;
+  }
+
+
+  function buildSalesforceNote(){
+    const f=settings.sfInclude||{};
+    const lines=[];
+    const push=(label,value)=>{if(String(value||"").trim())lines.push(`${label}: ${String(value).trim()}`);};
+    const intake=[$("intakeMonth").value.trim(),$("intakeYear").value.trim()].filter(Boolean).join(" ");
+    if(f.name)push("Name",$("name").value);
+    if(f.country)push("Country / Market",({us:"U.S.",canada:"Canada",international:"International"})[$("market").value]||"");
+    if(f.location)push(locationFieldLabel($("market").value),$("location").value);
+    if(f.leadSource)push("Lead Source",$("leadSource").value);
+    if(f.program)push("Program of Interest",$("program").value);
+    if(f.intake)push("Intended Intake",intake);
+    if(f.outcome){
+      push("Call Outcome",outcomeLabel($("callOutcome").value));
+      if($("callOutcome").value==="answered")push("Status",statusMeta($("status").value).label);
+    }
+    if(lines.length)lines.push("");
+    lines.push("ACADEMIC & PROFILE CONTEXT");
+    academicEntriesFromForm().forEach((entry,index)=>{
+      const prefix=index===0?"":"Academic entry "+(index+1)+" — ";
+      push(prefix+"Degree / School",entry.degreeSchool);
+      push(prefix+"Graduation",entry.gradDate);
+      push(prefix+"GPA",entry.gpa);
+    });
+    mcatScoresFromForm().forEach((score,index)=>push(index===0?"MCAT":"MCAT attempt "+(index+1),score));
+    const assessment=prereqAssessment();
+    if(assessment==="all")push("Prerequisites","All completed");
+    if(assessment==="missing" && missingPrereqs().length)push("Missing Prerequisites",missingPrereqs().join(", "));
+    push("Experience",$("experience").value);
+    lines.push("","CONVERSATION");
+    push("Call Summary / Notes",currentCombinedSummary());
+    push("Next Steps",$("nextSteps").value);
+    return lines.join("\n").trim();
+  }
+
+  async function copySalesforceNote(){
+    const note=buildSalesforceNote();
+    if(!note) return;
+    try{
+      await navigator.clipboard.writeText(note);
+      toast("Salesforce note copied");
+    }catch(e){
+      const temp=document.createElement("textarea");
+      temp.value=note;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      temp.remove();
+      toast("Salesforce note copied");
+    }
+  }
+
+  function render(){
+    renderActivity();
+    renderReport();
+    updateRecentNavigation();
+  }
+
+  function toast(message){
+    $("toast").textContent=message;
+    $("toast").classList.add("show");
+    setTimeout(()=>$("toast").classList.remove("show"),1800);
+  }
+
+  function pdfSafe(value){
+    return String(value ?? "")
+      .replace(/[^\x20-\x7E\xA0-\xFF]/g,"?")
+      .replace(/\\/g,"\\\\")
+      .replace(/\(/g,"\\(")
+      .replace(/\)/g,"\\)");
+  }
+
+  function hexToRgb01(hex){
+    const clean=String(hex||"#326295").replace("#","");
+    const n=parseInt(clean,16);
+    return [((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255];
+  }
+
+  function wrapText(text,maxChars){
+    const words=String(text||"").replace(/\s+/g," ").trim().split(" ").filter(Boolean);
+    const lines=[];
+    let line="";
+    words.forEach(word=>{
+      const test=line ? line+" "+word : word;
+      if(test.length>maxChars && line){
+        lines.push(line);
+        line=word;
+      } else {
+        line=test;
+      }
+    });
+    if(line) lines.push(line);
+    return lines.length ? lines : [""];
+  }
+
+  function buildDailyReportPdf(){
+    const all = todayRecords().filter(reportable);
+    const newItems = all.filter(r=>reportMode(r)==="new");
+    const followItems = all.filter(r=>reportMode(r)==="followup");
+    const blitzItems = all.filter(r=>reportMode(r)==="blitz");
+
+    const connectedNew = newItems.filter(isConnected).length;
+    const connectedFollow = followItems.filter(isConnected).length;
+    const connectedBlitz = blitzItems.filter(isConnected).length;
+    const connected = connectedNew + connectedFollow + connectedBlitz;
+    const pct=(n,d)=>d?Math.round((n/d)*100):0;
+    const calendlyItems = all.filter(r=>r.isCalendly && r.mode!=="blitz");
+    const calendlyConnected = calendlyItems.filter(isConnected).length;
+    const calendlyShowRate = pct(calendlyConnected, calendlyItems.length);
+    const sqlItems=all.filter(r=>r.isSQL && r.mode!=="blitz");
+    const sqlAnswered=sqlItems.filter(isConnected).length;
+    const sqlRate=pct(sqlAnswered,sqlItems.length);
+
+    const theme=THEMES[settings.theme]||THEMES.saba;
+    const [br,bg,bb]=hexToRgb01(theme.brand);
+
+    const W=612,H=792,margin=46;
+    const contentWidth=W-margin*2;
+    const pages=[];
+    let ops=[];
+    let y=H-margin;
+
+    const color=(r,g,b)=>`${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)} rg`;
+    const stroke=(r,g,b)=>`${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)} RG`;
+
+    const textLine=(txt,x,size=10,font="F1",rgb=[0.08,0.14,0.23])=>{
+      ops.push(`${color(...rgb)} BT /${font} ${size} Tf ${x} ${y} Td (${pdfSafe(txt)}) Tj ET`);
+    };
+    const textAt=(txt,x,yy,size=10,font="F1",rgb=[0.08,0.14,0.23])=>{
+      ops.push(`${color(...rgb)} BT /${font} ${size} Tf ${x} ${yy} Td (${pdfSafe(txt)}) Tj ET`);
+    };
+    const rule=()=>{
+      ops.push(`${stroke(0.84,0.88,0.92)} 0.6 w ${margin} ${y} m ${W-margin} ${y} l S`);
+    };
+    const drawPageHeader=(first)=>{
+      if(first){
+        textLine("ADVISOR DAILY REPORT",margin,19,"F2",[br,bg,bb]);
+        y-=21;
+        textLine(`Advisor: ${settings.advisorName||"Advisor"}`,margin,10.5,"F2",[0.08,0.14,0.23]);
+        y-=14;
+        textLine(`Date: ${todayLabel()}`,margin,10,"F1",[0.35,0.42,0.50]);
+        y-=20;
+        ops.push(`${color(br,bg,bb)} ${margin} ${y} ${contentWidth} 3 re f`);
+        y-=18;
+      } else {
+        textLine(`Advisor Daily Report - ${settings.advisorName||"Advisor"} - ${todayLabel()}`,margin,9,"F2",[br,bg,bb]);
+        y-=14;
+        rule();
+        y-=14;
+      }
+    };
+    const addPage=()=>{
+      if(ops.length) pages.push(ops.join("\n"));
+      ops=[];
+      y=H-margin;
+    };
+    const ensure=(need)=>{
+      if(y-need<margin){ addPage(); drawPageHeader(false); }
+    };
+    const section=(title)=>{
+      ensure(30);
+      y-=8;
+      textLine(title.toUpperCase(),margin,10.5,"F2",[br,bg,bb]);
+      y-=14;
+    };
+    const paragraph=(txt,indent=0,size=9.4,maxChars=94)=>{
+      const lines=wrapText(txt,maxChars);
+      ensure(lines.length*12+4);
+      lines.forEach(line=>{
+        textLine(line,margin+indent,size,"F1",[0.10,0.16,0.24]);
+        y-=12;
+      });
+    };
+    const statusRgb=(status)=>{
+      if(status==="applying") return [0.16,0.67,0.37];
+      if(status==="followup") return [0.86,0.63,0.12];
+      if(status==="notprogressing") return [0.84,0.22,0.29];
+      return [0.52,0.57,0.62];
+    };
+    const drawStatusDot=(x,yy,rgb)=>{
+      const [r,g,b]=rgb;
+      ops.push(`${color(r,g,b)} ${x} ${yy} 6 6 re f`);
+    };
+    const drawCases=(title,items)=>{
+      if(!items.length) return;
+      section(title);
+      items.forEach(r=>{
+        const intake=intakeDisplay(r);
+        const src=r.leadSource||"";
+        const meta=[r.name||"Unnamed contact"];
+        if(src)meta.push(src);
+        if(intake)meta.push(intake);
+        if(settings.reportIncludeProgram && r.program)meta.push(`(${reportProgramAbbreviation(r.program)})`);
+        const compact=`${meta.join(" - ")}${r.isSQL?" [SQL]":""} - ${summaryForRecord(r)}${r.nextSteps?` Next: ${r.nextSteps}`:""}`;
+        const compactLines=wrapText(compact,92);
+        ensure(compactLines.length*11+18);
+
+        drawStatusDot(margin,y-5,statusRgb(r.status));
+        compactLines.forEach((line,idx)=>{
+          textAt(line,margin+13,y-(idx*11),9.4,idx===0?"F2":"F1",[0.08,0.14,0.23]);
+        });
+        y-=compactLines.length*11+3;
+        rule();
+        y-=4;
+      });
+    };
+
+    drawPageHeader(true);
+
+    section("Call Activity");
+    paragraph(`Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})`,0,9.5,95);
+    paragraph(`Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})`,0,9.5,95);
+    paragraph(`Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${blitzItems.length?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})`,0,9.5,95);
+    paragraph(`Calendly Show Rate: ${calendlyShowRate}% (Total Calendly Calls: ${calendlyItems.length})`,0,9.5,95);
+    paragraph(`SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${sqlRate}%)`,0,9.5,95);
+
+    section("Connected Calls / Quality Summary");
+    drawCases("New Contacts",newItems.filter(isConnected));
+    drawCases("Follow-Ups",followItems.filter(isConnected));
+    drawCases("Call Blitz",blitzItems.filter(isConnected));
+
+    const observations=$("dailyObservations").value.trim();
+    if(observations){
+      section("Advisor Observations");
+      paragraph(observations,0,9.4,94);
+    }
+
+    if(settings.includeLegend !== false){
+      section("Status Legend - Answered Calls");
+      ensure(18);
+      let lx=margin;
+      [
+        ["applying",statusMeta("applying").label],
+        ["followup",statusMeta("followup").label],
+        ["notprogressing",statusMeta("notprogressing").label],
+        ["none",statusMeta("none").label]
+      ].forEach(([status,label])=>{
+        drawStatusDot(lx,y-5,statusRgb(status));
+        textAt(label,lx+10,y,8.5,"F1",[0.12,0.18,0.27]);
+        lx+=label.length*4.15+23;
+      });
+      y-=15;
+    }
+
+    if(ops.length) pages.push(ops.join("\n"));
+
+    const objects=[];
+    const addObj=(s)=>{objects.push(s);return objects.length;};
+    const fontRegular=addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+    const fontBold=addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+    const pagesObjIndex=addObj("__PAGES__");
+    const pageIds=[];
+
+    pages.forEach(stream=>{
+      const length=new TextEncoder().encode(stream).length;
+      const cid=addObj(`<< /Length ${length} >>\nstream\n${stream}\nendstream`);
+      const pid=addObj(`<< /Type /Page /Parent ${pagesObjIndex} 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 ${fontRegular} 0 R /F2 ${fontBold} 0 R >> >> /Contents ${cid} 0 R >>`);
+      pageIds.push(pid);
+    });
+
+    objects[pagesObjIndex-1]=`<< /Type /Pages /Count ${pageIds.length} /Kids [${pageIds.map(id=>`${id} 0 R`).join(" ")}] >>`;
+    const catalog=addObj(`<< /Type /Catalog /Pages ${pagesObjIndex} 0 R >>`);
+
+    let pdf="%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+    const offsets=[0];
+    objects.forEach((obj,i)=>{
+      offsets.push(new TextEncoder().encode(pdf).length);
+      pdf+=`${i+1} 0 obj\n${obj}\nendobj\n`;
+    });
+
+    const xrefOffset=new TextEncoder().encode(pdf).length;
+    pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;
+    for(let i=1;i<=objects.length;i++){
+      pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";
+    }
+    pdf+=`trailer\n<< /Size ${objects.length+1} /Root ${catalog} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+    return new Blob([new TextEncoder().encode(pdf)],{type:"application/pdf"});
+  }
+
+  function downloadDailyReportPdf(){
+    const blob=buildDailyReportPdf();
+    const a=document.createElement("a");
+    const advisor=(settings.advisorName||"Advisor").trim().replace(/[^a-z0-9]+/gi,"_").replace(/^_+|_+$/g,"")||"Advisor";
+    a.href=URL.createObjectURL(blob);
+    a.download=`Advisor_Daily_Report_${advisor}_${localDateKey()}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),500);
+    toast("Daily Report PDF exported");
+  }
+
+  function renderCommonCountries(){
+    const host=$("commonCountryList");
+    if(!host) return;
+    const countries=(settings.commonCountries||[]).slice().sort((a,b)=>a.localeCompare(b));
+    host.innerHTML=countries.length ? countries.map(c=>`
+      <span class="country-chip">${esc(c)}
+        <button type="button" data-remove-country="${esc(c)}" aria-label="Remove ${esc(c)}">×</button>
+      </span>`).join("") : `<span class="small-note">No common countries added yet.</span>`;
+    host.querySelectorAll("[data-remove-country]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const country=btn.dataset.removeCountry;
+        settings.commonCountries=(settings.commonCountries||[]).filter(c=>c!==country);
+        saveSettings();
+        renderCommonCountries();
+      });
+    });
+  }
+
+  function addCommonCountry(){
+    const input=$("commonCountryInput");
+    if(!input) return;
+    const value=input.value.trim();
+    if(!value) return;
+    const exists=(settings.commonCountries||[]).some(c=>c.toLowerCase()===value.toLowerCase());
+    if(!exists){
+      settings.commonCountries=[...(settings.commonCountries||[]),value];
+      saveSettings();
+    }
+    input.value="";
+    renderCommonCountries();
+  }
+
+  function renderCustomLeadSources(){
+    const host=$("customLeadSourceList");
+    if(!host)return;
+    const values=(settings.customLeadSources||[]).slice().sort((a,b)=>a.localeCompare(b));
+    host.innerHTML=values.length?values.map(value=>`
+      <span class="country-chip">${esc(value)}
+        <button type="button" data-remove-source="${esc(value)}" aria-label="Remove ${esc(value)}">×</button>
+      </span>`).join(""):`<span class="small-note">No custom lead sources added yet.</span>`;
+    host.querySelectorAll("[data-remove-source]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const value=btn.dataset.removeSource;
+        settings.customLeadSources=(settings.customLeadSources||[]).filter(x=>x!==value);
+        saveSettings();renderCustomLeadSources();
+      });
+    });
+  }
+
+  function addCustomLeadSource(){
+    const input=$("customLeadSourceInput");
+    if(!input)return;
+    const value=input.value.trim();
+    if(!value)return;
+    const all=[...LEAD_SOURCES,...(settings.customLeadSources||[])];
+    if(!all.some(x=>x.toLowerCase()===value.toLowerCase())){
+      settings.customLeadSources=[...(settings.customLeadSources||[]),value];
+      saveSettings();
+    }
+    input.value="";
+    renderCustomLeadSources();
+  }
+
+  function openSettings(){
+    $("advisorName").value=settings.advisorName||"";
+    $("statusGreenLabel").value=(settings.statusLabels&&settings.statusLabels.applying)||"Applying / Likely Applying";
+    $("statusYellowLabel").value=(settings.statusLabels&&settings.statusLabels.followup)||"Nurturing";
+    $("statusRedLabel").value=(settings.statusLabels&&settings.statusLabels.notprogressing)||"Not Progressing";
+    $("statusGrayLabel").value=(settings.statusLabels&&settings.statusLabels.none)||"None / Unclear";
+    ["statusGreenLabel","statusYellowLabel","statusRedLabel","statusGrayLabel"].forEach(id=>{$(id).readOnly=true;$(id).setAttribute("aria-readonly","true")});
+    if($("toggleStatusLockBtn")) $("toggleStatusLockBtn").textContent="Unlock editing";
+    $("reportIncludeProgramSetting").checked = settings.reportIncludeProgram === true;
+    $("includeLegendSetting").checked = settings.includeLegend !== false;
+    $("includeLegendQuick").checked = settings.includeLegend !== false;
+    $("reportPreviewDefaultSetting").checked = settings.reportPreviewDefaultOpen === true;
+    renderCustomLeadSources();
+    $("advancedSettings").open=false;
+    $("timezoneSettings").open=false;
+    $("statusDetails").open=false;
+    $("settingsScrollArea").scrollTop=0;
+    const sf=settings.sfInclude||{};
+    ["Name","Country","Location","LeadSource","Program","Intake","Outcome"].forEach(id=>{
+      $("sf"+id).checked=Boolean(sf[id[0].toLowerCase()+id.slice(1)]);
+    });
+    const tf=settings.taskFormat||{};
+    $("advisorTimezone").value=tf.advisorTimezone||"ET";
+    $("internationalCode").value=tf.internationalCode||"INTL";
+    $("taskIncludeTimezone").checked=tf.includeTimezone!==false;
+    $("taskIncludeCall").checked=tf.includeCall!==false;
+    $("taskIncludeIntake").checked=tf.includeIntake!==false;
+    $("taskIncludeNote").checked=tf.includeNote!==false;
+    $("taskCallWord").value=tf.callWord||"Call";
+    $("taskSeparator").value=tf.separator??" - ";
+    $("taskTimezoneBrackets").checked=tf.timezoneBrackets!==false;
+    $("taskIntakeBrackets").checked=tf.intakeBrackets!==false;
+    updateTaskSubject();
+    document.querySelectorAll(".theme-card").forEach(card=>{
+      card.classList.toggle("active",card.dataset.theme===settings.theme);
+    });
+    $("settingsModal").classList.add("show");
+  }
+
+  function syncTopbarHeight(){
+    const el=document.querySelector('.topbar');
+    if(el)document.documentElement.style.setProperty('--topbar-height',`${Math.ceil(el.getBoundingClientRect().height)}px`);
+  }
+  function updateFocusMode(){
+    const active=document.body.classList.contains('focus-mode');
+    $("focusBtn").textContent=active?"▣ Full workspace":"▣ Form only";
+    $("focusBtn").setAttribute('aria-pressed',String(active));
+  }
+  const DRAFT_KEY='advisor-lite-v29.draft';
+  function draftSnapshot(){
+    const form=$("interactionForm");
+    return {
+      recordId:$("recordId").value,
+      depth:getCaptureDepth(),category:getMode(),
+      values:Object.fromEntries([...form.querySelectorAll('input[id],textarea[id],select[id]')].map(el=>[
+        el.id, el.type==='checkbox'?el.checked:el.value
+      ])),
+      header:{callOutcome:$("callOutcome").value,status:$("status").value,
+        isCalendly:$("isCalendly").checked,isSQL:$("isSQL").checked,isPDC:$("isPDC").checked},
+      prereqAssessment:prereqAssessment(),missing:missingPrereqs(),
+      academicEntries:Array.from(document.querySelectorAll('[data-academic-row]')).map(row=>({
+        degreeSchool:(row.querySelector('[data-academic-degree]')||row.querySelector('#degreeSchool'))?.value||'',
+        gradDate:(row.querySelector('[data-academic-grad]')||row.querySelector('#gradDate'))?.value||'',
+        gpa:(row.querySelector('[data-academic-gpa]')||row.querySelector('#gpa'))?.value||''
+      })),
+      mcatScores:Array.from(document.querySelectorAll('[data-mcat-row]')).map(row=>(row.querySelector('[data-mcat-score]')||row.querySelector('#mcat'))?.value||''),
+      profileWasEdited, timestamp:new Date().toISOString()
+    };
+  }
+  function persistDraft(){
+    if(!isDirty)return;
+    try{localStorage.setItem(DRAFT_KEY,JSON.stringify(draftSnapshot()));}catch(e){formNotice('Draft storage unavailable — copy your notes','error');}
+    updateRecentNavigation();
+  }
+  function deleteDraft(){
+    try{localStorage.removeItem(DRAFT_KEY);}catch(e){}
+    updateRecentNavigation();
+  }
+  function availableDraft(){
+    try{const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');return d&&d.values?d:null;}catch(e){return null;}
+  }
+  function restoreDraft(){
+    const draft=availableDraft();if(!draft)return;
+    clearForm({depth:draft.depth||'quick',category:draft.category||'new'});
+    const f=draft.values||{};
+    for(const [id,value] of Object.entries(f)){
+      const el=$(id);if(!el || ['recordId','generatedProfile'].includes(id))continue;
+      if(el.type==='checkbox')el.checked=Boolean(value);
+      else el.value=value??'';
+    }
+    $("recordId").value=draft.recordId||'';
+    $("market").value=f.market||'';updateLocationField();$("location").value=f.location||'';
+    $("isCalendly").checked=Boolean(draft.header?.isCalendly);
+    $("isSQL").checked=Boolean(draft.header?.isSQL);
+    $("isPDC").checked=Boolean(draft.header?.isPDC);
+    setMode(draft.header?.isPDC?'followup':draft.category||'new');
+    setCaptureDepth(draft.depth||'quick',{preserveOutcome:true});
+    $("callOutcome").value=draft.header?.callOutcome||'';
+    populateStatusDropdown(draft.header?.status||'');updateStatusAvailability();
+    setPrereqAssessment(draft.prereqAssessment||'unassessed',draft.missing||[]);
+    if(Array.isArray(draft.academicEntries)||Array.isArray(draft.mcatScores)){
+      restoreAcademicLists(draft.academicEntries||[],draft.mcatScores||[]);
+    }
+    $("includeProfileDetails").checked=Boolean(f.includeProfileDetails);
+    $("generatedProfile").value=f.generatedProfile||'';
+    profileWasEdited=Boolean(draft.profileWasEdited);
+    updateProfileSummary();
+    updateInteractionFlags();updateTaskSubject();
+    setDirty(true);formNotice('Draft restored — not saved as an interaction','dirty');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  let pendingRecordNavigation=null;
+  function navigateToSaved(id){
+    const r=records.find(x=>x.id===id);if(!r)return;
+    if(isDirty){
+      pendingRecordNavigation=id;
+      $("navDialog").hidden=false;
+      $("navSave").focus();
+    }else editRecord(id);
+  }
+  function closeNavigationDialog(){$("navDialog").hidden=true;pendingRecordNavigation=null;}
+  function updateRecentNavigation(){
+    if(!$("prevRecord"))return;
+    const ordered=todayRecords();const id=$("recordId").value;
+    const ix=ordered.findIndex(r=>r.id===id);
+    // A blank form is positioned just before the newest saved record.
+    $("prevRecord").disabled=ordered.length===0 || (ix>=0 && ix>=ordered.length-1);
+    $("nextRecord").disabled=ix<=0;
+    $("recentNavLabel").textContent=ix<0?'Recent saved interactions':`${ix+1} of ${ordered.length} saved`;
+    $("restoreDraftBtn").hidden=!availableDraft();
+  }
+  function previousRecord(){
+    const arr=todayRecords();if(!arr.length)return;
+    const ix=arr.findIndex(r=>r.id===$("recordId").value);
+    const dest=ix<0?arr[0]:arr[Math.min(ix+1,arr.length-1)];
+    if(dest)navigateToSaved(dest.id);
+  }
+  function nextRecord(){
+    const arr=todayRecords();const ix=arr.findIndex(r=>r.id===$("recordId").value);
+    if(ix>0)navigateToSaved(arr[ix-1].id);
+  }
+
+  let savingInteraction=false;
+  let awaitingNextCall=false;
+  function readyForNextCall(){
+    awaitingNextCall=true;
+    $("quickSaveBtn").type="button";
+    $("quickSaveBtn").textContent="Next Call";
+
+  }
+  function enableSaveForNextCall(){
+    if(!awaitingNextCall)return;
+    awaitingNextCall=false;
+    $("quickSaveBtn").type="submit";
+    $("quickSaveBtn").textContent="Save as Activity";
+
+  }
+  function wireEvents(){
+    $("focusBtn").addEventListener("click",()=>{
+      document.body.classList.toggle('focus-mode');updateFocusMode();syncTopbarHeight();
+    });
+    window.addEventListener('resize',syncTopbarHeight);
+    if(window.ResizeObserver)new ResizeObserver(syncTopbarHeight).observe(document.querySelector('.topbar'));
+    $("prevRecord").addEventListener('click',previousRecord);
+    $("nextRecord").addEventListener('click',nextRecord);
+    $("restoreDraftBtn").addEventListener('click',()=>{
+      if(isDirty && !confirm('Replace this unsaved form with your saved draft?'))return;
+      restoreDraft();
+    });
+    $("navCancel").addEventListener('click',closeNavigationDialog);
+    $("navKeep").addEventListener('click',()=>{
+      persistDraft();const target=pendingRecordNavigation;closeNavigationDialog();
+      setDirty(false);if(target)editRecord(target);
+    });
+    $("navDiscard").addEventListener('click',()=>{
+      deleteDraft();const target=pendingRecordNavigation;closeNavigationDialog();
+      setDirty(false);if(target)editRecord(target);
+    });
+    $("navSave").addEventListener('click',()=>{
+      const target=pendingRecordNavigation;
+      const snapshotCount=records.length;
+      closeNavigationDialog();
+      $("interactionForm").requestSubmit($("quickSaveBtn"));
+      if(!isDirty && target)editRecord(target); // If validation failed, leave unsaved form in place.
+    });
+    $("quickSaveBtn").addEventListener("click",e=>{
+      if(!awaitingNextCall)return;
+      e.preventDefault(); // Do not submit as type changes to submit on this click.
+      enableSaveForNextCall();
+      formNotice("Ready to record the next call","saved");
+      $("callOutcome").focus();
+    });
+    document.querySelectorAll(".capture-mode-switch button").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        if(getCaptureDepth()!==btn.dataset.depth){
+          setCaptureDepth(btn.dataset.depth);
+          enableSaveForNextCall();
+          setDirty(true);persistDraft();
+        }
+      });
+    });
+    document.querySelectorAll(".mode-switch button").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        if(getMode()!==btn.dataset.mode){setMode(btn.dataset.mode);enableSaveForNextCall();setDirty(true);persistDraft();}
+      });
+    });
+
+    $("interactionForm").addEventListener("submit",function(e){
+      e.preventDefault();
+      if(savingInteraction)return;
+      const record=collectRecord();
+      if(!record)return;
+      savingInteraction=true;
+      $("quickSaveBtn").disabled=true;
+
+      const idx=records.findIndex(r=>r.id===record.id);
+      const previous=idx>=0?records[idx]:null;
+      if(idx>=0)records[idx]=record;else records.push(record);
+      try{saveState();}
+      catch(err){
+        if(idx>=0)records[idx]=previous;else records.pop();
+        saveError("browser storage is unavailable; copy your notes before leaving",$("name"));
+        savingInteraction=false;
+        $("quickSaveBtn").disabled=false;
+
+        return;
+      }
+      deleteDraft();
+      $("searchActivity").value="";
+      render();
+      $("activityList").scrollTop=0;
+      const depth=record.callDepth,category=record.mode;
+      clearForm({depth,category});
+      updateRecentNavigation();
+      readyForNextCall();
+      const verb=idx>=0?"updated":"saved";
+      formNotice(`${record.name||"Call attempt"} ${verb} at ${new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})} — ready for the next call`,"saved");
+      toast(`Interaction ${verb}`);
+      savingInteraction=false;
+      $("quickSaveBtn").disabled=false;
+
+    });
+
+    $("clearBtn").addEventListener("click",()=>{
+      if(!confirmDiscard())return;
+      deleteDraft();clearForm();enableSaveForNextCall();formNotice("Form cleared","saved");
+    });
+    $("isCalendly").addEventListener("change",()=>updateInteractionFlags("calendly"));
+    $("isSQL").addEventListener("change",()=>updateInteractionFlags("sql"));
+    $("isPDC").addEventListener("change",()=>updateInteractionFlags("pdc"));
+    if($("addCommonCountryBtn")) $("addCommonCountryBtn").addEventListener("click",addCommonCountry);
+    if($("commonCountryInput")) $("commonCountryInput").addEventListener("keydown",e=>{
+      if(e.key==="Enter"){ e.preventDefault(); addCommonCountry(); }
+    });
+    if($("addCustomLeadSourceBtn")) $("addCustomLeadSourceBtn").addEventListener("click",addCustomLeadSource);
+    if($("customLeadSourceInput")) $("customLeadSourceInput").addEventListener("keydown",e=>{
+      if(e.key==="Enter"){e.preventDefault();addCustomLeadSource();}
+    });
+    if($("includeLegendQuick")) $("includeLegendQuick").addEventListener("change",()=>{
+      settings.includeLegend=$("includeLegendQuick").checked;
+      $("includeLegendSetting").checked=settings.includeLegend;
+      saveSettings();renderReport();
+    });
+    $("market").addEventListener("change",function(){
+      $("location").value="";
+      updateLocationField();
+      updateTimezoneOverrideHint();
+      updateTaskSubject();
+    });
+    $("callOutcome").addEventListener("change",function(){
+      updateStatusAvailability();
+    });
+    $("copySfBtn").addEventListener("click",copySalesforceNote);
+    $("includeProfileDetails").addEventListener("change",()=>{updateProfileSummary();setDirty(true);persistDraft();});
+    $("generatedProfile").addEventListener("input",()=>{
+      profileWasEdited=true;
+      updateProfileSummary();setDirty(true);persistDraft();
+    });
+    $("refreshProfileBtn").addEventListener("click",()=>{
+      updateProfileSummary(true);setDirty(true);persistDraft();
+    });
+    $("addAcademicBtn").addEventListener('click',()=>{
+      const row=addAcademicEntry();if(row){registerAcademicChange();row.querySelector('[data-academic-degree]').focus();}
+    });
+    $("addMcatBtn").addEventListener('click',()=>{
+      const row=addMcatScore();if(row){registerAcademicChange();row.querySelector('[data-mcat-score]').focus();}
+    });
+    [$('academicRows'),$('mcatRows')].forEach(host=>{
+      host.addEventListener('input',e=>{if(e.target.matches('input') && e.target.closest('.is-extra'))registerAcademicChange();});
+      host.addEventListener('click',e=>{
+        const remove=e.target.closest('.entry-remove');if(!remove)return;
+        const row=remove.closest('.is-extra');if(!row)return;
+        row.remove();updateEntryButtons();registerAcademicChange();
+      });
+    });
+    ["program","intakeMonth","intakeYear","degreeSchool","gpa","mcat"].forEach(id=>{
+      ["input","change"].forEach(evt=>$(id).addEventListener(evt,()=>updateProfileSummary()));
+    });
+    document.querySelectorAll('#prereqGrid input').forEach(el=>el.addEventListener('change',()=>updateProfileSummary()));
+    document.querySelectorAll('input[name="prereqAssessment"]').forEach(r=>r.addEventListener("change",()=>{
+      setPrereqAssessment(r.value);
+      updateProfileSummary();
+      setDirty(true);
+      persistDraft();
+    }));
+    $("searchActivity").addEventListener("input",renderActivity);
+    ["input","change"].forEach(evt=>$("interactionForm").addEventListener(evt,()=>{
+      enableSaveForNextCall();setDirty(true);persistDraft();
+    }));
+    ["callOutcome","status","isCalendly","isSQL","isPDC"].forEach(id=>{
+      $(id).addEventListener("change",()=>{enableSaveForNextCall();setDirty(true);persistDraft();});
+    });
+    window.addEventListener("beforeunload",e=>{
+      if(!isDirty)return;
+      e.preventDefault();e.returnValue="";
+    });
+    $("dailyObservations").addEventListener("input",renderReport);
+    $("reportPreview").addEventListener("toggle",()=>{
+      if($("reportPreview").open)$("report").scrollTop=0;
+    });
+    ["currentCallNumber","taskTimezoneOverride","taskTimezoneDate","taskNote","intakeMonth","intakeYear","location"].forEach(id=>{
+      const el=$(id); if(!el) return;
+      ["input","change"].forEach(evt=>el.addEventListener(evt,()=>{updateTimezoneOverrideHint();updateTaskSubject();}));
+    });
+    ["advisorTimezone","internationalCode","taskIncludeTimezone","taskIncludeCall","taskIncludeIntake","taskIncludeNote","taskCallWord","taskSeparator","taskTimezoneBrackets","taskIntakeBrackets"].forEach(id=>{
+      const el=$(id); if(!el) return;
+      ["input","change"].forEach(evt=>el.addEventListener(evt,()=>{
+        const old=settings.taskFormat||{};
+        settings.taskFormat=Object.assign({},old,{
+          advisorTimezone:$("advisorTimezone")?.value||old.advisorTimezone||"ET",
+          internationalCode:$("internationalCode")?.value.trim()||old.internationalCode||"INTL",
+          includeTimezone:$("taskIncludeTimezone")?.checked??old.includeTimezone,
+          includeCall:$("taskIncludeCall")?.checked??old.includeCall,
+          includeIntake:$("taskIncludeIntake")?.checked??old.includeIntake,
+          includeNote:$("taskIncludeNote")?.checked??old.includeNote,
+          callWord:$("taskCallWord")?.value||old.callWord||"Call",
+          separator:$("taskSeparator")?.value??old.separator??" - ",
+          timezoneBrackets:$("taskTimezoneBrackets")?.checked??old.timezoneBrackets,
+          intakeBrackets:$("taskIntakeBrackets")?.checked??old.intakeBrackets
+        }); updateTaskSubject();
+      }));
+    });
+    $("copyTaskSubjectBtn").addEventListener("click",async()=>{
+      const value=$("taskSubjectOutput").value;
+      if(!value){toast("Add enough details to generate a task subject");return;}
+      try{await navigator.clipboard.writeText(value);toast("Task subject copied");}
+      catch(e){$("taskSubjectOutput").select();document.execCommand("copy");toast("Task subject copied");}
+    });
+
+    $("appearanceBtn").addEventListener("click",function(){
+      settings.appearance = settings.appearance==="dark" ? "light" : "dark";
+      saveSettings();
+      applyTheme();
+    });
+
+    $("settingsBtn").addEventListener("click",openSettings);
+
+    $("newDayBtn").addEventListener("click",function(){
+      if(!confirmDiscard())return;
+      enableSaveForNextCall();
+      const today = localDateKey();
+      const todays = records.filter(r=>r.date===today);
+      if(!todays.length){
+        clearForm();
+        $("dailyObservations").value="";
+        render();
+        toast("Today is already clear");
+        return;
+      }
+      const ok = confirm(`Start a new day? This clears ${todays.length} saved interaction${todays.length===1?"":"s"} from today's view. Export first if you want a copy.`);
+      if(!ok) return;
+      records = records.filter(r=>r.date!==today);
+      saveState();
+      clearForm();
+      $("dailyObservations").value="";
+      localStorage.removeItem(observationsKey());
+      render();
+      toast("New day started");
+    });
+    $("toggleStatusLockBtn").addEventListener("click",()=>{
+      const ids=["statusGreenLabel","statusYellowLabel","statusRedLabel","statusGrayLabel"];
+      const unlocking=$(ids[0]).readOnly;
+      ids.forEach(id=>{$(id).readOnly=!unlocking;if(unlocking)$(id).removeAttribute("aria-readonly");else $(id).setAttribute("aria-readonly","true")});
+      $("toggleStatusLockBtn").textContent=unlocking?"Lock editing":"Unlock editing";
+    });
+    $("closeSettings").addEventListener("click",()=>$("settingsModal").classList.remove("show"));
+
+    $("settingsModal").addEventListener("click",function(e){
+      if(e.target===this) this.classList.remove("show");
+    });
+
+    document.querySelectorAll(".theme-card").forEach(card=>{
+      function selectSchoolTheme(){
+        settings.theme=card.dataset.theme;
+        applyTheme();
+      }
+      card.addEventListener("click",selectSchoolTheme);
+      card.addEventListener("keydown",e=>{
+        if(e.key==="Enter"||e.key===" "){
+          e.preventDefault();selectSchoolTheme();
+        }
+      });
+    });
+
+    $("saveSettingsBtn").addEventListener("click",function(){
+      settings.advisorName=$("advisorName").value.trim();
+      settings.statusLabels={
+        applying:$("statusGreenLabel").value.trim()||"Applying / Likely Applying",
+        followup:$("statusYellowLabel").value.trim()||"Nurturing",
+        notprogressing:$("statusRedLabel").value.trim()||"Not Progressing",
+        none:$("statusGrayLabel").value.trim()||"None / Unclear"
+      };
+      settings.reportIncludeProgram = $("reportIncludeProgramSetting").checked;
+      settings.includeLegend = $("includeLegendSetting").checked;
+      $("includeLegendQuick").checked=settings.includeLegend;
+      settings.reportPreviewDefaultOpen = $("reportPreviewDefaultSetting").checked;
+      $("reportPreview").open=settings.reportPreviewDefaultOpen;
+      settings.sfInclude={};
+      ["Name","Country","Location","LeadSource","Program","Intake","Outcome"].forEach(id=>{
+        settings.sfInclude[id[0].toLowerCase()+id.slice(1)]=$("sf"+id).checked;
+      });
+      settings.taskFormat={
+        advisorTimezone:$("advisorTimezone").value||"ET",
+        internationalCode:$("internationalCode").value.trim()||"INTL",
+        includeTimezone:$("taskIncludeTimezone").checked,
+        includeCall:$("taskIncludeCall").checked,
+        includeIntake:$("taskIncludeIntake").checked,
+        includeNote:$("taskIncludeNote").checked,
+        callWord:$("taskCallWord").value.trim()||"Call",
+        separator:$("taskSeparator").value,
+        timezoneBrackets:$("taskTimezoneBrackets").checked,
+        intakeBrackets:$("taskIntakeBrackets").checked
+      };
+      saveSettings();
+      applyTheme();
+      render();
+      $("settingsModal").classList.remove("show");
+      toast("Settings saved");
+    });
+
+    $("exportBtn").addEventListener("click",downloadDailyReportPdf);
+
+    $("copyBtn").addEventListener("click",async function(){
+      const text=reportText();
+      const html=reportHtmlForClipboard();
+      try{
+        if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+          const item=new ClipboardItem({
+            "text/plain":new Blob([text],{type:"text/plain"}),
+            "text/html":new Blob([html],{type:"text/html"})
+          });
+          await navigator.clipboard.write([item]);
+        }else{
+          await navigator.clipboard.writeText(text);
+        }
+        toast("Daily Report Log copied");
+      }catch(e){
+        const temp=document.createElement("div");
+        temp.contentEditable="true";
+        temp.setAttribute("aria-hidden","true");
+        temp.style.position="fixed";
+        temp.style.left="-9999px";
+        temp.style.top="0";
+        temp.innerHTML=html;
+        document.body.appendChild(temp);
+        const range=document.createRange();
+        range.selectNodeContents(temp);
+        const selection=window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand("copy");
+        selection.removeAllRanges();
+        temp.remove();
+        toast("Daily Report Log copied");
+      }
+    });
+  }
+
+  populateLists();
+  loadState();
+  $("reportPreview").open=Boolean(settings.reportPreviewDefaultOpen);
+  populateStatusDropdown("");
+  $("dailyObservations").value = localStorage.getItem(observationsKey()) || "";
+  wireComboboxes();
+  wireEvents();
+  $("dailyObservations").addEventListener("input",()=>localStorage.setItem(observationsKey(),$("dailyObservations").value));
+  applyTheme();
+  if(!$("program").value) $("program").value="Doctor of Medicine";
+  setMode(getMode());
+  setCaptureDepth("quick");
+  updateLocationField();
+  updateOutcomeOptions();
+  updateStatusAvailability();
+  if($("taskTimezoneDate") && !$("taskTimezoneDate").value) $("taskTimezoneDate").value=localDateKey();
+  updateTimezoneOverrideHint();
+  updateTaskSubject();
+  render();
+  setInterval(updateTaskSubject,15*60*1000);
+})();
+</script>
+</body>
+</html>
