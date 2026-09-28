@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Advisor Intake & Daily Report Log Lite — v1.2</title>
+<title>Advisor Intake & Daily Report Log Lite — v1.3</title>
 <style>
 :root{
   --brand:#326295;
@@ -1078,6 +1078,34 @@ input[type="checkbox"]:checked::before{
   .legend-copy-toggle{margin-left:0}
 }
 
+
+/* v1.3: persistent history with a compact previous-day calendar control */
+.history-date-wrap{position:relative;display:inline-flex;align-items:center}
+.history-date-btn{
+  width:38px!important;min-width:38px!important;padding:7px 8px!important;
+  display:inline-flex;align-items:center;justify-content:center
+}
+.history-date-popover{
+  position:absolute;right:0;top:calc(100% + 7px);z-index:80;
+  width:220px;padding:10px;border:1px solid var(--border);border-radius:10px;
+  background:var(--panel);color:var(--text)
+}
+.history-date-popover label{
+  display:block;font-size:10px;font-weight:800;margin-bottom:6px;color:var(--text)
+}
+.history-date-popover input{
+  width:100%;height:35px;padding:6px 8px;border:1px solid var(--border);
+  border-radius:8px;background:var(--panel);color:var(--text);font:inherit
+}
+.history-today-btn{width:100%;margin-top:7px;height:33px}
+.history-date-btn.is-history{
+  border-color:var(--brand)!important;color:var(--brand)!important;
+  background:var(--brand-soft)!important
+}
+@media(max-width:700px){
+  .history-date-popover{position:fixed;right:12px;top:62px;width:min(240px,calc(100vw - 24px))}
+}
+
 </style>
 </head>
 <body>
@@ -1087,7 +1115,7 @@ input[type="checkbox"]:checked::before{
       <span id="advisorFirstName">Advisor</span>
     </div>
     <div class="brand-copy">
-      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.2</span></h1>
+      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.3</span></h1>
       <p>Simple same-day intake and manager-ready reporting.</p>
       <span id="advisorDisplay" class="sr-only">Advisor</span>
     </div>
@@ -1098,6 +1126,14 @@ input[type="checkbox"]:checked::before{
     <button class="btn" id="focusBtn" type="button" aria-pressed="false">▣ Focus mode</button>
     <button class="btn" id="appearanceBtn">🌙 Dark</button>
     <button class="btn" id="settingsBtn">⚙ Settings</button>
+    <div class="history-date-wrap">
+      <button class="btn history-date-btn" id="historyDateBtn" type="button" title="View a previous day" aria-expanded="false" aria-controls="historyDatePopover">📅</button>
+      <div class="history-date-popover" id="historyDatePopover" hidden>
+        <label for="historyDatePicker">View saved day</label>
+        <input id="historyDatePicker" type="date" />
+        <button class="btn secondary history-today-btn" id="historyTodayBtn" type="button">Today</button>
+      </div>
+    </div>
     <button class="btn" id="newDayBtn">↻ Start New Day</button>
   </div>
 </header>
@@ -1329,7 +1365,7 @@ input[type="checkbox"]:checked::before{
     <section class="card">
       <div class="card-head">
         <div>
-          <h2>Today's Activity</h2>
+          <h2 id="activityHeading">Today's Activity</h2>
           <p id="activityCount">0 interactions saved</p>
         </div>
         <input id="searchActivity" placeholder="Search name or source..." style="max-width:240px" />
@@ -1342,7 +1378,7 @@ input[type="checkbox"]:checked::before{
         <div class="report-head">
           <div>
             <h3>Daily Report Log</h3>
-            <p>Manager-ready summary for today.</p>
+            <p id="reportDateContext">Manager-ready summary for today.</p>
           </div>
           <button class="btn primary" id="copyBtn">Copy for Teams</button>
         </div>
@@ -1737,8 +1773,24 @@ input[type="checkbox"]:checked::before{
     return `${y}-${m}-${day}`;
   }
 
+  let selectedViewDate=localDateKey();
+
+  function dateFromKey(key){
+    const parts=String(key||"").split("-").map(Number);
+    if(parts.length!==3 || parts.some(n=>!Number.isFinite(n)))return new Date();
+    return new Date(parts[0],parts[1]-1,parts[2],12,0,0);
+  }
+
+  function viewDateLabel(){
+    return dateFromKey(selectedViewDate).toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"});
+  }
+
   function todayLabel(){
-    return new Date().toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"});
+    return viewDateLabel();
+  }
+
+  function isViewingToday(){
+    return selectedViewDate===localDateKey();
   }
 
   function makeId(){
@@ -1746,8 +1798,14 @@ input[type="checkbox"]:checked::before{
     return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
   }
 
-  function observationsKey(){
-    return `advisor-lite-v2.observations.${localDateKey()}`;
+  function observationsKey(dateKey=selectedViewDate){
+    return `advisor-lite-v2.observations.${dateKey}`;
+  }
+
+  function loadObservationsForViewedDate(){
+    if($("dailyObservations")){
+      $("dailyObservations").value=localStorage.getItem(observationsKey())||"";
+    }
   }
 
   function saveState(){
@@ -1778,59 +1836,6 @@ input[type="checkbox"]:checked::before{
       settings.taskFormat=Object.assign({advisorTimezone:"ET",internationalCode:"INTL",includeTimezone:true,includeCall:true,includeIntake:true,includeNote:true,callWord:"Call",separator:" - ",timezoneBrackets:true,intakeBrackets:true},settings.taskFormat||{});
     }catch(e){}
 
-    const seededKey="advisor-lite-v25.initial-samples";
-    if(!localStorage.getItem(seededKey)){
-      if(localStorage.getItem(STORAGE_KEY)===null && !records.length) seedSampleData();
-      localStorage.setItem(seededKey,"1");
-    }
-  }
-
-  function seedSampleData(){
-    const d = localDateKey();
-    const now = Date.now();
-    records = [
-      {
-        id:makeId(),date:d,createdAt:new Date(now-1000*60*145).toISOString(),updatedAt:new Date(now-1000*60*145).toISOString(),
-        mode:"new",name:"Maria Santos",market:"canada",location:"Ontario",leadSource:"Google AdWords Search",program:"Doctor of Medicine",
-        intakeMonth:"January",intakeYear:"2027",gradDate:"May 2026",degreeSchool:"BSc Health Sciences — York University",
-        gpa:"3.52",mcat:"505",prerequisites:["General Biology I","General Biology II","General Chemistry I","General Chemistry II","Organic Chemistry I"],experience:"Clinical volunteering and research assistant experience.",isCalendly:true,callOutcome:"answered",
-        status:"applying",summary:"Very interested in applying and reviewing the remaining prerequisite timeline.",
-        nextSteps:"Send application steps and follow up on Friday.",dailyReview:true
-      },
-      {
-        id:makeId(),date:d,createdAt:new Date(now-1000*60*100).toISOString(),updatedAt:new Date(now-1000*60*100).toISOString(),
-        mode:"followup",name:"David Lee",market:"canada",location:"Ontario",leadSource:"Facebook PPC",program:"Gateway Medical",
-        intakeMonth:"May",intakeYear:"2027",gradDate:"2025",degreeSchool:"BSc Biology — McMaster University",
-        gpa:"3.31",mcat:"",prerequisites:["General Biology I","General Biology II","General Chemistry I"],experience:"Hospital volunteer experience.",isCalendly:false,callOutcome:"answered",
-        status:"followup",summary:"Interested but needs more time to discuss financing and timing with family.",
-        nextSteps:"Follow up next week.",dailyReview:true
-      },
-      {
-        id:makeId(),date:d,createdAt:new Date(now-1000*60*54).toISOString(),updatedAt:new Date(now-1000*60*54).toISOString(),
-        mode:"new",name:"Sara Ahmed",market:"canada",location:"Ontario",leadSource:"Other Organic",program:"Pre-Med Master's",
-        intakeMonth:"September",intakeYear:"2027",gradDate:"April 2026",degreeSchool:"BSc Biomedical Sciences — University of Ottawa",
-        gpa:"3.18",mcat:"498",prerequisites:["General Biology I","General Chemistry I"],experience:"Research and community volunteering.",isCalendly:true,callOutcome:"calendly_no_show",
-        status:"",summary:"After discussing current circumstances, she does not plan to move forward at this time.",
-        nextSteps:"No further follow-up requested.",dailyReview:true
-      },
-      {
-        id:makeId(),date:d,createdAt:new Date(now-1000*60*20).toISOString(),updatedAt:new Date(now-1000*60*20).toISOString(),
-        mode:"blitz",name:"James Carter",market:"canada",location:"Ontario",leadSource:"Purchase List",program:"Pre-Med 5-Year",
-        intakeMonth:"January",intakeYear:"2028",gradDate:"2024",degreeSchool:"BSc Psychology — Western University",
-        gpa:"3.40",mcat:"",prerequisites:["General Biology I"],experience:"Healthcare administration experience.",isCalendly:false,callOutcome:"no_response",
-        status:"",summary:"Reached briefly but did not have enough time to fully assess interest.",
-        nextSteps:"Try again later this week.",dailyReview:true
-      },
-      {
-        id:makeId(),date:d,createdAt:new Date(now-1000*60*8).toISOString(),updatedAt:new Date(now-1000*60*8).toISOString(),
-        mode:"new",name:"Nina Patel",market:"canada",location:"Ontario",leadSource:"Referral",program:"Pre-Med 6-Year",
-        intakeMonth:"September",intakeYear:"2028",gradDate:"June 2027",degreeSchool:"High School / Pre-University Studies",
-        gpa:"",mcat:"",prerequisites:[],experience:"Volunteer experience in a community health setting.",isCalendly:false,callOutcome:"answered",
-        status:"followup",summary:"Interested in the six-year pathway and wants to understand entry requirements and timing.",
-        nextSteps:"Send pathway information and follow up next week.",dailyReview:true
-      }
-    ];
-    saveState();
   }
 
   function populateLists(){
@@ -2455,7 +2460,7 @@ input[type="checkbox"]:checked::before{
 
     return {
       id: existingId || makeId(),
-      date: localDateKey(),
+      date: old?.date || localDateKey(),
       createdAt: old ? old.createdAt : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       mode:getMode(),
@@ -2575,9 +2580,47 @@ input[type="checkbox"]:checked::before{
   }
 
   function todayRecords(){
-    return records.filter(r=>r.date===localDateKey()).sort((a,b)=>
+    return records.filter(r=>r.date===selectedViewDate).sort((a,b)=>
       (b.updatedAt||b.createdAt||"").localeCompare(a.updatedAt||a.createdAt||"") ||
       (b.createdAt||"").localeCompare(a.createdAt||""));
+  }
+
+  function syncViewedDateUi(){
+    const picker=$("historyDatePicker");
+    if(picker){
+      picker.value=selectedViewDate;
+      picker.max=localDateKey();
+    }
+    const past=!isViewingToday();
+    $("historyDateBtn")?.classList.toggle("is-history",past);
+    if($("activityHeading"))$("activityHeading").textContent=past?`Activity — ${viewDateLabel()}`:"Today's Activity";
+    if($("reportDateContext"))$("reportDateContext").textContent=past?`Manager-ready summary for ${viewDateLabel()}.`:"Manager-ready summary for today.";
+  }
+
+  function setViewedDate(dateKey,{clearCapture=true,closePicker=true}={}){
+    if(!dateKey)return false;
+    const today=localDateKey();
+    if(dateKey>today)dateKey=today;
+    if(dateKey===selectedViewDate){
+      if(closePicker)$("historyDatePopover").hidden=true;
+      syncViewedDateUi();
+      return true;
+    }
+    if(clearCapture && isDirty && !confirmDiscard())return false;
+    if(clearCapture){
+      deleteDraft();
+      clearForm();
+      enableSaveForNextCall();
+    }
+    selectedViewDate=dateKey;
+    loadObservationsForViewedDate();
+    syncViewedDateUi();
+    render();
+    if($("activityList"))$("activityList").scrollTop=0;
+    if($("report"))$("report").scrollTop=0;
+    if(closePicker)$("historyDatePopover").hidden=true;
+    $("historyDateBtn")?.setAttribute("aria-expanded","false");
+    return true;
   }
 
   function isConnected(r){
@@ -2595,7 +2638,7 @@ input[type="checkbox"]:checked::before{
     $("activityCount").textContent = `${all.length} interaction${all.length===1?"":"s"} saved`;
 
     if(!filtered.length){
-      $("activityList").innerHTML = `<div class="empty">No matching interactions saved today.</div>`;
+      $("activityList").innerHTML = `<div class="empty">${isViewingToday()?"No matching interactions saved today.":`No interactions saved for ${esc(viewDateLabel())}.`}</div>`;
       return;
     }
 
@@ -2619,6 +2662,10 @@ input[type="checkbox"]:checked::before{
     document.querySelectorAll(".activity").forEach(el=>{
       el.addEventListener("click",()=>navigateToSaved(el.dataset.id));
     });
+  }
+
+  function hasCallBlitzActivity(records){
+    return (records || []).some(r=>reportMode(r)==="blitz");
   }
 
   function reportProgramAbbreviation(program){
@@ -2670,6 +2717,7 @@ input[type="checkbox"]:checked::before{
     const newItems = all.filter(r=>reportMode(r)==="new");
     const followItems = all.filter(r=>reportMode(r)==="followup");
     const blitzItems = all.filter(r=>reportMode(r)==="blitz");
+    const showBlitz=hasCallBlitzActivity(all);
 
     const connectedNew = newItems.filter(isConnected).length;
     const connectedFollow = followItems.filter(isConnected).length;
@@ -2707,7 +2755,7 @@ input[type="checkbox"]:checked::before{
 
     const observations=$("dailyObservations").value.trim();
     $("dailyGlance").innerHTML=`
-      <div class="glance-row"><strong>Total Calls:</strong> ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})</div>
+      <div class="glance-row"><strong>Total Calls:</strong> ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${showBlitz?` | Call Blitz: ${blitzItems.length}`:""})</div>
       <div class="glance-row"><strong>Connected Calls:</strong> ${connected} | <strong>Overall Connect Rate:</strong> ${overallRate}%</div>
       <div class="glance-row"><strong>Calendly:</strong> ${calendlyItems.length} | Shows: ${calendlyConnected} | Show Rate: ${calendlyShowRate}%</div>
       <div class="glance-row"><strong>SQL Incoming:</strong> ${sqlItems.length} | Answered: ${sqlAnswered} | Connect Rate: ${sqlRate}%</div>`;
@@ -2716,16 +2764,16 @@ input[type="checkbox"]:checked::before{
       <div style="font-weight:850;margin-bottom:9px"><strong>ADVISOR DAILY REPORT — ${esc(todayLabel())}</strong></div>
       <h4>Call Activity</h4>
       <div class="metrics">
-        <div>Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})</div>
-        <div>Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})</div>
-        <div>Overall Connect Rate: ${overallRate}% (New Contact: ${newRate}% | Follow-Up: ${followRate}%${blitzItems.length?` | Call Blitz: ${blitzRate}%`:""})</div>
+        <div>Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${showBlitz?` | Call Blitz: ${blitzItems.length}`:""})</div>
+        <div>Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${showBlitz?` | Call Blitz: ${connectedBlitz}`:""})</div>
+        <div>Overall Connect Rate: ${overallRate}% (New Contact: ${newRate}% | Follow-Up: ${followRate}%${showBlitz?` | Call Blitz: ${blitzRate}%`:""})</div>
         <div>Calendly Show Rate: ${calendlyShowRate}% (Total Calendly Calls: ${calendlyItems.length})</div>
         <div>SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${sqlRate}%)</div>
       </div>
       <h4>Connected Calls / Quality Summary</h4>
       ${section("New Contacts",newItems.filter(isConnected))}
       ${section("Follow-Ups",followItems.filter(isConnected))}
-      ${section("Call Blitz",blitzItems.filter(isConnected))}
+      ${showBlitz?section("Call Blitz",blitzItems.filter(isConnected)):""}
       ${!all.some(isConnected)?`<div style="color:var(--muted);margin-bottom:10px">No answered calls included in today's quality summary.</div>`:""}
       ${observations?`<h4 style="margin-top:12px">Advisor Observations</h4><div class="metrics"><div>${esc(observations).replace(/\n/g,"<br>")}</div></div>`:""}`;
 
@@ -2744,6 +2792,7 @@ input[type="checkbox"]:checked::before{
     const newItems=all.filter(r=>reportMode(r)==="new");
     const followItems=all.filter(r=>reportMode(r)==="followup");
     const blitzItems=all.filter(r=>reportMode(r)==="blitz");
+    const showBlitz=hasCallBlitzActivity(all);
     const connectedNew=newItems.filter(isConnected).length;
     const connectedFollow=followItems.filter(isConnected).length;
     const connectedBlitz=blitzItems.filter(isConnected).length;
@@ -2757,9 +2806,9 @@ input[type="checkbox"]:checked::before{
     const lines=[
       `ADVISOR DAILY REPORT — ${todayLabel()}`,"",
       "CALL ACTIVITY",
-      `Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})`,
-      `Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})`,
-      `Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${blitzItems.length?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})`,
+      `Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${showBlitz?` | Call Blitz: ${blitzItems.length}`:""})`,
+      `Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${showBlitz?` | Call Blitz: ${connectedBlitz}`:""})`,
+      `Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${showBlitz?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})`,
       `Calendly Show Rate: ${pct(calendlyConnected,calendlyItems.length)}% (Total Calendly Calls: ${calendlyItems.length})`,
       `SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${pct(sqlAnswered,sqlItems.length)}%)`,"",
       "CONNECTED CALLS / QUALITY SUMMARY"
@@ -2775,7 +2824,7 @@ input[type="checkbox"]:checked::before{
     };
     addSection("New Contacts",newItems.filter(isConnected));
     addSection("Follow-Ups",followItems.filter(isConnected));
-    addSection("Call Blitz",blitzItems.filter(isConnected));
+    if(showBlitz)addSection("Call Blitz",blitzItems.filter(isConnected));
 
     const obs=$("dailyObservations").value.trim();
     if(obs)lines.push("","ADVISOR OBSERVATIONS",obs);
@@ -2793,6 +2842,7 @@ input[type="checkbox"]:checked::before{
     const newItems=all.filter(r=>reportMode(r)==="new");
     const followItems=all.filter(r=>reportMode(r)==="followup");
     const blitzItems=all.filter(r=>reportMode(r)==="blitz");
+    const showBlitz=hasCallBlitzActivity(all);
     const connectedNew=newItems.filter(isConnected).length;
     const connectedFollow=followItems.filter(isConnected).length;
     const connectedBlitz=blitzItems.filter(isConnected).length;
@@ -2806,9 +2856,9 @@ input[type="checkbox"]:checked::before{
     const blocks=[];
     blocks.push(`<div><strong>ADVISOR DAILY REPORT — ${esc(todayLabel())}</strong></div><br>`);
     blocks.push(`<div><strong>CALL ACTIVITY</strong></div>`);
-    blocks.push(`<div>Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})</div>`);
-    blocks.push(`<div>Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})</div>`);
-    blocks.push(`<div>Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${blitzItems.length?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})</div>`);
+    blocks.push(`<div>Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${showBlitz?` | Call Blitz: ${blitzItems.length}`:""})</div>`);
+    blocks.push(`<div>Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${showBlitz?` | Call Blitz: ${connectedBlitz}`:""})</div>`);
+    blocks.push(`<div>Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${showBlitz?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})</div>`);
     blocks.push(`<div>Calendly Show Rate: ${pct(calendlyConnected,calendlyItems.length)}% (Total Calendly Calls: ${calendlyItems.length})</div>`);
     blocks.push(`<div>SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${pct(sqlAnswered,sqlItems.length)}%)</div><br>`);
     blocks.push(`<div><strong>CONNECTED CALLS / QUALITY SUMMARY</strong></div>`);
@@ -2823,7 +2873,7 @@ input[type="checkbox"]:checked::before{
     };
     addSection("New Contacts",newItems.filter(isConnected));
     addSection("Follow-Ups",followItems.filter(isConnected));
-    addSection("Call Blitz",blitzItems.filter(isConnected));
+    if(showBlitz)addSection("Call Blitz",blitzItems.filter(isConnected));
 
     const obs=$("dailyObservations").value.trim();
     if(obs)blocks.push(`<br><div><strong>ADVISOR OBSERVATIONS</strong></div><div>${esc(obs).replace(/\n/g,"<br>")}</div>`);
@@ -2933,6 +2983,7 @@ input[type="checkbox"]:checked::before{
     const newItems = all.filter(r=>reportMode(r)==="new");
     const followItems = all.filter(r=>reportMode(r)==="followup");
     const blitzItems = all.filter(r=>reportMode(r)==="blitz");
+    const showBlitz=hasCallBlitzActivity(all);
 
     const connectedNew = newItems.filter(isConnected).length;
     const connectedFollow = followItems.filter(isConnected).length;
@@ -3043,16 +3094,16 @@ input[type="checkbox"]:checked::before{
     drawPageHeader(true);
 
     section("Call Activity");
-    paragraph(`Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${blitzItems.length?` | Call Blitz: ${blitzItems.length}`:""})`,0,9.5,95);
-    paragraph(`Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${blitzItems.length?` | Call Blitz: ${connectedBlitz}`:""})`,0,9.5,95);
-    paragraph(`Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${blitzItems.length?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})`,0,9.5,95);
+    paragraph(`Total Calls: ${all.length} (New Contacts: ${newItems.length} | Follow-Ups: ${followItems.length}${showBlitz?` | Call Blitz: ${blitzItems.length}`:""})`,0,9.5,95);
+    paragraph(`Connected Calls: ${connected} (New Contacts: ${connectedNew} | Follow-Ups: ${connectedFollow}${showBlitz?` | Call Blitz: ${connectedBlitz}`:""})`,0,9.5,95);
+    paragraph(`Overall Connect Rate: ${pct(connected,all.length)}% (New Contact: ${pct(connectedNew,newItems.length)}% | Follow-Up: ${pct(connectedFollow,followItems.length)}%${showBlitz?` | Call Blitz: ${pct(connectedBlitz,blitzItems.length)}%`:""})`,0,9.5,95);
     paragraph(`Calendly Show Rate: ${calendlyShowRate}% (Total Calendly Calls: ${calendlyItems.length})`,0,9.5,95);
     paragraph(`SQL Incoming Calls: ${sqlItems.length} (Answered: ${sqlAnswered} | Connect Rate: ${sqlRate}%)`,0,9.5,95);
 
     section("Connected Calls / Quality Summary");
     drawCases("New Contacts",newItems.filter(isConnected));
     drawCases("Follow-Ups",followItems.filter(isConnected));
-    drawCases("Call Blitz",blitzItems.filter(isConnected));
+    if(showBlitz)drawCases("Call Blitz",blitzItems.filter(isConnected));
 
     const observations=$("dailyObservations").value.trim();
     if(observations){
@@ -3118,7 +3169,7 @@ input[type="checkbox"]:checked::before{
     const a=document.createElement("a");
     const advisor=(settings.advisorName||"Advisor").trim().replace(/[^a-z0-9]+/gi,"_").replace(/^_+|_+$/g,"")||"Advisor";
     a.href=URL.createObjectURL(blob);
-    a.download=`Advisor_Daily_Report_${advisor}_${localDateKey()}.pdf`;
+    a.download=`Advisor_Daily_Report_${advisor}_${selectedViewDate}.pdf`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -3418,6 +3469,11 @@ input[type="checkbox"]:checked::before{
       }
       deleteDraft();
       $("searchActivity").value="";
+      if(!previous && selectedViewDate!==record.date){
+        selectedViewDate=record.date;
+        loadObservationsForViewedDate();
+        syncViewedDateUi();
+      }
       render();
       $("activityList").scrollTop=0;
       const depth=record.callDepth,category=record.mode;
@@ -3546,27 +3602,51 @@ input[type="checkbox"]:checked::before{
 
     $("settingsBtn").addEventListener("click",openSettings);
 
+    $("historyDateBtn").addEventListener("click",e=>{
+      e.stopPropagation();
+      const pop=$("historyDatePopover");
+      const opening=pop.hidden;
+      pop.hidden=!opening;
+      $("historyDateBtn").setAttribute("aria-expanded",String(opening));
+      if(opening){
+        $("historyDatePicker").value=selectedViewDate;
+        $("historyDatePicker").max=localDateKey();
+        setTimeout(()=>$("historyDatePicker").focus(),0);
+      }
+    });
+    $("historyDatePicker").addEventListener("change",()=>{
+      const desired=$("historyDatePicker").value||localDateKey();
+      const old=selectedViewDate;
+      if(!setViewedDate(desired)){
+        $("historyDatePicker").value=old;
+      }
+    });
+    $("historyTodayBtn").addEventListener("click",()=>setViewedDate(localDateKey()));
+    $("historyDatePopover").addEventListener("click",e=>e.stopPropagation());
+    document.addEventListener("click",()=>{
+      if(!$("historyDatePopover").hidden){
+        $("historyDatePopover").hidden=true;
+        $("historyDateBtn").setAttribute("aria-expanded","false");
+      }
+    });
+    document.addEventListener("keydown",e=>{
+      if(e.key==="Escape" && !$("historyDatePopover").hidden){
+        $("historyDatePopover").hidden=true;
+        $("historyDateBtn").setAttribute("aria-expanded","false");
+        $("historyDateBtn").focus();
+      }
+    });
+
     $("newDayBtn").addEventListener("click",function(){
       if(!confirmDiscard())return;
+      deleteDraft();
       enableSaveForNextCall();
-      const today = localDateKey();
-      const todays = records.filter(r=>r.date===today);
-      if(!todays.length){
-        clearForm();
-        $("dailyObservations").value="";
-        render();
-        toast("Today is already clear");
-        return;
-      }
-      const ok = confirm(`Start a new day? This clears ${todays.length} saved interaction${todays.length===1?"":"s"} from today's view. Export first if you want a copy.`);
-      if(!ok) return;
-      records = records.filter(r=>r.date!==today);
-      saveState();
       clearForm();
-      $("dailyObservations").value="";
-      localStorage.removeItem(observationsKey());
+      selectedViewDate=localDateKey();
+      loadObservationsForViewedDate();
+      syncViewedDateUi();
       render();
-      toast("New day started");
+      toast("Ready for today — previous days remain saved");
     });
     $("toggleStatusLockBtn").addEventListener("click",()=>{
       const ids=["statusGreenLabel","statusYellowLabel","statusRedLabel","statusGrayLabel"];
@@ -3671,7 +3751,9 @@ input[type="checkbox"]:checked::before{
   loadState();
   $("reportPreview").open=Boolean(settings.reportPreviewDefaultOpen);
   populateStatusDropdown("");
-  $("dailyObservations").value = localStorage.getItem(observationsKey()) || "";
+  selectedViewDate=localDateKey();
+  loadObservationsForViewedDate();
+  syncViewedDateUi();
   wireComboboxes();
   wireEvents();
   $("dailyObservations").addEventListener("input",()=>localStorage.setItem(observationsKey(),$("dailyObservations").value));
