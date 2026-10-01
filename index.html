@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Advisor Intake & Daily Report Log Lite — v1.3.1</title>
+<title>Advisor Intake & Daily Report Log Lite — v1.4.3</title>
 <style>
 :root{
   --brand:#326295;
@@ -1106,6 +1106,196 @@ input[type="checkbox"]:checked::before{
   .history-date-popover{position:fixed;right:12px;top:62px;width:min(240px,calc(100vw - 24px))}
 }
 
+
+/* v1.3.2 — use the same chevron treatment for native and custom dropdowns. */
+select:not([multiple]){
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M2 2l4 4 4-4' fill='none' stroke='%23697888' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;
+  background-position:right 11px center!important;
+  background-size:12px 8px!important;
+  padding-right:34px!important;
+}
+body.dark select:not([multiple]){
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M2 2l4 4 4-4' fill='none' stroke='%23A9B4C2' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+}
+.combo-toggle{
+  font-size:0!important;
+  width:32px!important;
+  height:100%!important;
+  right:0!important;
+  top:0!important;
+  transform:none!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+}
+.combo-toggle::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-right:1.8px solid var(--muted);
+  border-bottom:1.8px solid var(--muted);
+  transform:rotate(45deg) translate(-1px,-1px);
+}
+.combo-toggle:disabled::before{opacity:.55}
+.dot.blue{background:#2F70AD}
+.badge-blue{background:color-mix(in srgb,#2F70AD 13%,var(--panel));color:#245A8D;border-color:color-mix(in srgb,#2F70AD 30%,var(--border))}
+
+
+/* v1.4 — compact optional citizenship and clearer location hierarchy */
+.citizenship-control{
+  margin-top:7px;
+  min-height:24px;
+}
+.compact-add-link{
+  appearance:none;border:0;background:transparent;color:var(--brand-ink);
+  padding:2px 1px;font:inherit;font-size:10px;font-weight:750;cursor:pointer
+}
+.compact-add-link:hover{text-decoration:underline}
+.citizenship-field{
+  display:flex;align-items:flex-end;gap:8px;margin-top:6px;
+  width:min(300px,100%);padding:8px 9px;border:1px solid var(--border);
+  border-radius:9px;background:var(--panel)
+}
+.citizenship-field[hidden]{display:none!important}
+.citizenship-field .field{flex:1;min-width:0}
+.citizenship-remove{
+  height:36px;border:0;background:transparent;color:var(--muted);
+  font:inherit;font-size:10px;font-weight:700;padding:0 4px;cursor:pointer
+}
+.citizenship-remove:hover{color:var(--text);text-decoration:underline}
+@media(max-width:600px){
+  .citizenship-field{width:100%}
+}
+
+
+/* v1.4.2 — clearer action hierarchy.
+   Selected form choices use a light school tint; primary/external actions remain stronger. */
+.segmented button.active,
+.depth-tabs button.active,
+.type-tabs button.active,
+.interaction-tabs button.active,
+button[data-mode].active,
+button[data-depth].active{
+  background:color-mix(in srgb,var(--brand) 10%,var(--panel))!important;
+  color:var(--brand-ink)!important;
+  border-color:color-mix(in srgb,var(--brand) 55%,var(--border))!important;
+  box-shadow:none!important;
+}
+.segmented button.active:hover,
+.depth-tabs button.active:hover,
+.type-tabs button.active:hover,
+.interaction-tabs button.active:hover,
+button[data-mode].active:hover,
+button[data-depth].active:hover{
+  background:color-mix(in srgb,var(--brand) 14%,var(--panel))!important;
+}
+
+/* Save stays the unmistakable primary action. */
+#quickSaveBtn{
+  background:var(--brand)!important;
+  color:#fff!important;
+  border-color:var(--brand)!important;
+  box-shadow:none!important;
+}
+
+/* External application actions keep the current school fill but use one close product-color outline. */
+.external-action{
+  background:var(--brand)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  border-width:2px!important;
+  border-style:solid!important;
+}
+.sf-action{
+  border-color:#0176D3!important; /* Salesforce Cloud Blue */
+}
+.teams-action{
+  border-color:#4B53BC!important; /* Microsoft Teams */
+}
+.external-action:hover{
+  background:var(--brand-strong)!important;
+}
+.external-action:focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:2px;
+}
+
+/* Keep the same hierarchy in dark mode without making selected tabs heavy. */
+body.dark .segmented button.active,
+body.dark .depth-tabs button.active,
+body.dark .type-tabs button.active,
+body.dark .interaction-tabs button.active,
+body.dark button[data-mode].active,
+body.dark button[data-depth].active{
+  background:color-mix(in srgb,var(--brand) 18%,var(--panel))!important;
+  color:color-mix(in srgb,var(--brand) 38%,#fff)!important;
+  border-color:color-mix(in srgb,var(--brand) 72%,var(--border))!important;
+}
+
+
+/* v1.4.3 — selected controls stay readable on hover; external buttons get one tight product outline. */
+.mode-switch button.active,
+.capture-mode-switch button.active{
+  background:color-mix(in srgb,var(--brand) 10%,var(--panel))!important;
+  color:var(--brand-ink)!important;
+  border:1px solid color-mix(in srgb,var(--brand) 58%,var(--border))!important;
+  box-shadow:none!important;
+}
+.mode-switch button.active:hover,
+.capture-mode-switch button.active:hover{
+  background:color-mix(in srgb,var(--brand) 15%,var(--panel))!important;
+  color:var(--brand-ink)!important;
+  border-color:color-mix(in srgb,var(--brand) 72%,var(--border))!important;
+}
+.mode-switch button:hover:not(.active),
+.capture-mode-switch button:hover:not(.active){
+  background:var(--panel-soft)!important;
+  color:var(--text)!important;
+  border-color:color-mix(in srgb,var(--brand) 32%,var(--border))!important;
+}
+
+/* One close outline only — no white separator ring. */
+.external-action{
+  background:var(--brand)!important;
+  color:#fff!important;
+  border:1px solid var(--brand)!important;
+  box-shadow:none!important;
+}
+.sf-action{
+  box-shadow:0 0 0 2px #0176D3!important;
+}
+.teams-action{
+  box-shadow:0 0 0 2px #5B5FC7!important;
+}
+.sf-action:hover,
+.teams-action:hover{
+  background:var(--brand-strong)!important;
+  color:#fff!important;
+}
+.sf-action:focus-visible{
+  outline:2px solid #0176D3!important;
+  outline-offset:3px!important;
+}
+.teams-action:focus-visible{
+  outline:2px solid #5B5FC7!important;
+  outline-offset:3px!important;
+}
+
+body.dark .mode-switch button.active,
+body.dark .capture-mode-switch button.active{
+  background:color-mix(in srgb,var(--brand) 20%,var(--panel))!important;
+  color:color-mix(in srgb,var(--brand) 35%,#fff)!important;
+  border-color:color-mix(in srgb,var(--brand) 72%,var(--border))!important;
+}
+body.dark .mode-switch button.active:hover,
+body.dark .capture-mode-switch button.active:hover{
+  background:color-mix(in srgb,var(--brand) 25%,var(--panel))!important;
+  color:color-mix(in srgb,var(--brand) 30%,#fff)!important;
+}
+
 </style>
   <!-- GoatCounter usage analytics -->
   <script data-goatcounter="https://hrashid-saba.goatcounter.com/count"
@@ -1118,7 +1308,7 @@ input[type="checkbox"]:checked::before{
       <span id="advisorFirstName">Advisor</span>
     </div>
     <div class="brand-copy">
-      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.3.1</span></h1>
+      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.4.3</span></h1>
       <p>Simple same-day intake and manager-ready reporting.</p>
       <span id="advisorDisplay" class="sr-only">Advisor</span>
     </div>
@@ -1208,7 +1398,7 @@ input[type="checkbox"]:checked::before{
             <input id="name" required placeholder="Enter name" autocomplete="off" autocapitalize="words" spellcheck="false" />
           </div>
           <div class="field" data-full-basics>
-            <label>Country <span class="field-optional">optional</span></label>
+            <label>Location</label>
             <select id="market">
               <option value="">Select</option>
               <option value="us">U.S.</option>
@@ -1219,8 +1409,8 @@ input[type="checkbox"]:checked::before{
           <div class="field" data-full-basics>
             <label id="locationLabel">State / Province / Country</label>
             <div class="combo" data-combo="location">
-              <input id="location" placeholder="Select country first" autocomplete="off" spellcheck="false" disabled />
-              <button class="combo-toggle" type="button" aria-label="Show location options" disabled>▼</button>
+              <input id="location" placeholder="Select location first" autocomplete="off" spellcheck="false" disabled />
+              <button class="combo-toggle" type="button" aria-label="Show state, province or country options" disabled>▼</button>
               <div class="combo-menu"></div>
             </div>
           </div>
@@ -1231,6 +1421,21 @@ input[type="checkbox"]:checked::before{
               <button class="combo-toggle" type="button" aria-label="Show lead source options">▼</button>
               <div class="combo-menu"></div>
             </div>
+          </div>
+        </div>
+
+        <div class="citizenship-control" data-full-basics>
+          <button type="button" class="compact-add-link" id="toggleCitizenshipBtn" aria-expanded="false" aria-controls="citizenshipField">＋ Citizenship <span class="field-optional">optional</span></button>
+          <div class="citizenship-field" id="citizenshipField" hidden>
+            <div class="field">
+              <label>Citizenship <span class="field-optional">optional</span></label>
+              <div class="combo" data-combo="citizenship">
+                <input id="citizenship" placeholder="Type or select country" autocomplete="off" spellcheck="false" />
+                <button class="combo-toggle" type="button" aria-label="Show citizenship country options">▼</button>
+                <div class="combo-menu"></div>
+              </div>
+            </div>
+            <button type="button" class="citizenship-remove" id="removeCitizenshipBtn">Remove</button>
           </div>
         </div>
 
@@ -1351,7 +1556,7 @@ input[type="checkbox"]:checked::before{
           <div><label class="checkbox"><input id="dailyReview" type="checkbox" checked /> Add to Daily Report Log</label></div>
           <div class="form-secondary-actions">
             <button type="button" class="btn" id="clearBtn">Clear form</button>
-            <button type="button" class="btn" id="copySfBtn">Copy to SF</button>
+            <button type="button" class="btn external-action sf-action" id="copySfBtn">Copy to SF</button>
           </div>
         </div>
       </form>
@@ -1383,7 +1588,7 @@ input[type="checkbox"]:checked::before{
             <h3>Daily Report Log</h3>
             <p id="reportDateContext">Manager-ready summary for today.</p>
           </div>
-          <button class="btn primary" id="copyBtn">Copy for Teams</button>
+          <button class="btn primary external-action teams-action" id="copyBtn">Copy for Teams</button>
         </div>
         <div class="daily-glance" id="dailyGlance" aria-live="polite"></div>
         <div class="report-legend-toolbar">
@@ -1487,7 +1692,7 @@ input[type="checkbox"]:checked::before{
           </div>
         </div>
         <div class="settings-subheading country-heading">Common international countries</div>
-        <p class="settings-hint">Add countries that appear frequently. International remains a free-text field even when no country is saved here.</p>
+        <p class="settings-hint">Add countries your team uses often. They appear first in the Location and Citizenship lists; all countries remain available.</p>
         <div class="settings-inline-field">
           <input id="commonCountryInput" placeholder="e.g. India" autocomplete="off" aria-label="Common country name" />
           <button class="btn secondary" type="button" id="addCommonCountryBtn">Add</button>
@@ -1529,8 +1734,8 @@ input[type="checkbox"]:checked::before{
         <p class="settings-hint">The note starts with Academic &amp; Profile Context and Conversation. Select additional fields only if your team needs them.</p>
         <div class="task-settings-grid settings-checkbox-grid">
           <label class="setting-check"><input id="sfName" type="checkbox" /> Name</label>
-          <label class="setting-check"><input id="sfCountry" type="checkbox" /> Country / market</label>
-          <label class="setting-check"><input id="sfLocation" type="checkbox" /> State, province or country</label>
+          <label class="setting-check"><input id="sfCountry" type="checkbox" /> Location</label>
+          <label class="setting-check"><input id="sfLocation" type="checkbox" /> State / province</label>
           <label class="setting-check"><input id="sfLeadSource" type="checkbox" /> Lead source</label>
           <label class="setting-check"><input id="sfProgram" type="checkbox" /> Program of interest</label>
           <label class="setting-check"><input id="sfIntake" type="checkbox" /> Intended intake</label>
@@ -1631,6 +1836,8 @@ input[type="checkbox"]:checked::before{
     "Instagram","Instagram PPC","LinkedIn","LinkedIn PPC","Other","Other Organic",
     "Purchase List","Unknown","Unlisted","AI Referral"
   ];
+
+  const COUNTRIES = ["Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bonaire, Sint Eustatius and Saba", "Bosnia and Herzegovina", "Botswana", "Bouvet Island", "Brazil", "British Indian Ocean Territory", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Côte d’Ivoire", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Falkland Islands (Malvinas)", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Heard Island and McDonald Islands", "Holy See (Vatican City State)", "Honduras", "Hong Kong", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macao", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "North Macedonia", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "Réunion", "Saint Barthélemy", "Saint Helena, Ascension and Tristan da Cunha", "Saint Kitts and Nevis", "Saint Lucia", "Saint Martin (French part)", "Saint Pierre and Miquelon", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten (Dutch part)", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia and the South Sandwich Islands", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Svalbard and Jan Mayen", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkmenistan", "Turks and Caicos Islands", "Tuvalu", "Türkiye", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "United States Minor Outlying Islands", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "Virgin Islands, British", "Virgin Islands, U.S.", "Wallis and Futuna", "Western Sahara", "Yemen", "Zambia", "Zimbabwe", "Åland Islands"];
 
   const US_STATES = [
     "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -1847,6 +2054,62 @@ input[type="checkbox"]:checked::before{
   }
 
 
+  function normalizedCountryKey(value){
+    return String(value||"").trim().toLowerCase().replace(/[.\s]/g,"");
+  }
+
+  function prioritizedCountries(){
+    const common=(settings.commonCountries||[]).map(x=>String(x||"").trim()).filter(Boolean);
+    const seen=new Set();
+    return [...common,...COUNTRIES].filter(value=>{
+      const key=value.toLowerCase();
+      if(seen.has(key))return false;
+      seen.add(key);return true;
+    }).sort((a,b)=>{
+      const ai=common.findIndex(x=>x.toLowerCase()===a.toLowerCase());
+      const bi=common.findIndex(x=>x.toLowerCase()===b.toLowerCase());
+      if(ai>=0 || bi>=0){
+        if(ai<0)return 1;if(bi<0)return -1;return ai-bi;
+      }
+      return a.localeCompare(b);
+    });
+  }
+
+  function marketForRecord(r){
+    if(r.market)return r.market;
+    const key=normalizedCountryKey(r.country||"");
+    if(["unitedstates","unitedstatesofamerica","usa","us"].includes(key))return "us";
+    if(key==="canada")return "canada";
+    if(r.country)return "international";
+    return "";
+  }
+
+  function locationForRecord(r){
+    const market=marketForRecord(r);
+    // v1.4 stored the actual international country in r.country and optional region/city in r.location.
+    // The streamlined v1.4.1 UI uses the second field for the country itself when International is selected.
+    if(market==="international" && r.country)return r.country;
+    return r.location||"";
+  }
+
+  function locationCountryValue(){
+    const market=$("market")?.value||"";
+    if(market==="us")return "United States";
+    if(market==="canada")return "Canada";
+    if(market==="international")return $("location")?.value.trim()||"";
+    return "";
+  }
+
+  function setCitizenshipVisible(show,{focus=false}={}){
+    const field=$("citizenshipField");
+    const btn=$("toggleCitizenshipBtn");
+    if(!field||!btn)return;
+    field.hidden=!show;
+    btn.hidden=show;
+    btn.setAttribute("aria-expanded",String(show));
+    if(show && focus)$("citizenship")?.focus();
+  }
+
   function comboOptionsFor(key){
     if(key==="leadSource"){
       const merged=[...LEAD_SOURCES,...(settings.customLeadSources||[])];
@@ -1858,11 +2121,12 @@ input[type="checkbox"]:checked::before{
       }).sort((a,b)=>a.localeCompare(b));
     }
     if(key==="program") return PROGRAMS_BY_SCHOOL[settings.theme] || PROGRAMS_BY_SCHOOL.saba;
+    if(key==="citizenship") return prioritizedCountries();
     if(key==="location"){
       const market=$("market") ? $("market").value : "";
       if(market==="us") return US_STATES;
       if(market==="canada") return CANADA_PROVINCES;
-      if(market==="international") return settings.commonCountries || [];
+      if(market==="international") return prioritizedCountries();
       return [];
     }
     return [];
@@ -1987,7 +2251,8 @@ input[type="checkbox"]:checked::before{
       applying:{label:labels.applying || "Applying / Likely Applying",dot:"green",badge:"badge-green",icon:"🟢"},
       followup:{label:labels.followup || "Nurturing",dot:"yellow",badge:"badge-yellow",icon:"🟡"},
       notprogressing:{label:labels.notprogressing || "Not Progressing",dot:"red",badge:"badge-red",icon:"🔴"},
-      none:{label:labels.none || "None / Unclear",dot:"gray",badge:"badge-gray",icon:"⚪"}
+      none:{label:labels.none || "None / Unclear",dot:"gray",badge:"badge-gray",icon:"⚪"},
+      warmtransfer:{label:"Warm Transfer",dot:"blue",badge:"badge-blue",icon:"🔵"}
     };
     return map[value] || map.none;
   }
@@ -1998,44 +2263,48 @@ input[type="checkbox"]:checked::before{
   function reportMode(r){return r.isPDC ? "followup" : r.mode;}
   function reportable(r){return r.isPDC ? r.reviewOptOut!==true : r.dailyReview!==false;}
 
-  function updateLocationField(){
+  function updateLocationField({clearIfCountryTypeChanged=false}={}){
     const market=$("market");
     const label=$("locationLabel");
     const input=$("location");
     const combo=input ? input.closest(".combo") : null;
     const toggle=combo ? combo.querySelector(".combo-toggle") : null;
-    if(!market || !label || !input) return;
+    if(!market || !label || !input)return;
 
-    const value=market.value;
-    if(value==="us"){
+    const selected=market.value;
+    const previous=input.dataset.market||"";
+    if(clearIfCountryTypeChanged && previous && previous!==selected)input.value="";
+    input.dataset.market=selected;
+
+    if(selected==="us"){
       label.textContent="State";
       input.placeholder="Type or select state";
       input.disabled=false;
-      if(toggle) toggle.disabled=false;
-    }else if(value==="canada"){
+      if(toggle){toggle.disabled=false;toggle.setAttribute("aria-label","Show state options");}
+    }else if(selected==="canada"){
       label.textContent="Province";
       input.placeholder="Type or select province";
       input.disabled=false;
-      if(toggle) toggle.disabled=false;
-    }else if(value==="international"){
+      if(toggle){toggle.disabled=false;toggle.setAttribute("aria-label","Show province options");}
+    }else if(selected==="international"){
       label.textContent="Country";
-      input.placeholder="Type country or select";
+      input.placeholder="Type or select country";
       input.disabled=false;
-      if(toggle) toggle.disabled=false;
+      if(toggle){toggle.disabled=false;toggle.setAttribute("aria-label","Show country options");}
     }else{
       label.textContent="State / Province / Country";
-      input.placeholder="Select country first";
+      input.placeholder="Select location first";
       input.disabled=true;
-      if(toggle) toggle.disabled=true;
+      if(toggle)toggle.disabled=true;
     }
-    if(combo && combo.classList.contains("open")) renderCombo(combo,true);
+    if(combo && combo.classList.contains("open") && !toggle?.disabled)renderCombo(combo,true);
   }
 
   function locationFieldLabel(market){
-    if(market==="us") return "State";
-    if(market==="canada") return "Province";
-    if(market==="international") return "Country";
-    return "Location";
+    if(market==="us")return "State";
+    if(market==="canada")return "Province";
+    if(market==="international")return "Country";
+    return "State / Province / Country";
   }
 
   function normalizeZoneKey(zone){
@@ -2182,7 +2451,8 @@ input[type="checkbox"]:checked::before{
       ["applying", statusMeta("applying").label],
       ["followup", statusMeta("followup").label],
       ["notprogressing", statusMeta("notprogressing").label],
-      ["none", statusMeta("none").label]
+      ["none", statusMeta("none").label],
+      ["warmtransfer", statusMeta("warmtransfer").label]
     ];
     $("status").innerHTML = `<option value="">Select status</option>` + options.map(([value,label])=>`<option value="${value}">${esc(label)}</option>`).join("");
     $("status").value = options.some(([value])=>value===current) ? current : "";
@@ -2469,12 +2739,14 @@ input[type="checkbox"]:checked::before{
       mode:getMode(),
       callDepth:depth,
       name:$("name").value.trim(),
+      country:locationCountryValue(),
       market:$("market").value,
       location:$("location").value.trim(),
+      citizenship:$("citizenship").value.trim(),
       leadSource:$("leadSource").value.trim(),
-      program:$("program").value.trim(),
-      intakeMonth:$("intakeMonth").value.trim(),
-      intakeYear:$("intakeYear").value.trim(),
+      program:depth==="quick"?"":$("program").value.trim(),
+      intakeMonth:depth==="quick"?"":$("intakeMonth").value.trim(),
+      intakeYear:depth==="quick"?"":$("intakeYear").value.trim(),
       gradDate:$("gradDate").value,
       degreeSchool:$("degreeSchool").value.trim(),
       gpa:$("gpa").value.trim(),
@@ -2506,6 +2778,8 @@ input[type="checkbox"]:checked::before{
     $("recordId").value="";
     $("market").value="";
     $("location").value="";
+    $("citizenship").value="";
+    setCitizenshipVisible(false);
     updateLocationField();
     $("intakeYear").value="2027";
     $("program").value="Doctor of Medicine";
@@ -2541,9 +2815,11 @@ input[type="checkbox"]:checked::before{
 
     $("recordId").value=r.id;
     $("name").value=r.name||"";
-    $("market").value=r.market||"";
+    $("market").value=marketForRecord(r);
     updateLocationField();
-    $("location").value=r.location||"";
+    $("location").value=locationForRecord(r);
+    $("citizenship").value=r.citizenship||"";
+    setCitizenshipVisible(Boolean(r.citizenship));
     $("leadSource").value=r.leadSource||"";
     $("program").value=r.program||"";
     $("intakeMonth").value=r.intakeMonth||"";
@@ -2783,7 +3059,7 @@ input[type="checkbox"]:checked::before{
     const inlineLegend=$("reportLegendInline");
     inlineLegend.innerHTML=[
       `<span class="legend-title">STATUS LEGEND — ANSWERED CALLS</span>`,
-      ...[["green","applying"],["yellow","followup"],["red","notprogressing"],["gray","none"]]
+      ...[["green","applying"],["yellow","followup"],["red","notprogressing"],["gray","none"],["blue","warmtransfer"]]
         .map(([tone,key])=>`<span class="legend-item"><span class="dot ${tone}" aria-hidden="true"></span>${esc(statusMeta(key).label)}</span>`)
     ].join("");
     $("includeLegendQuick").checked=settings.includeLegend!==false;
@@ -2834,7 +3110,7 @@ input[type="checkbox"]:checked::before{
 
     if(settings.includeLegend!==false){
       lines.push("",
-        `STATUS LEGEND — ANSWERED CALLS: 🟢 ${statusMeta("applying").label} | 🟡 ${statusMeta("followup").label} | 🔴 ${statusMeta("notprogressing").label} | ⚪ ${statusMeta("none").label}`
+        `STATUS LEGEND — ANSWERED CALLS: 🟢 ${statusMeta("applying").label} | 🟡 ${statusMeta("followup").label} | 🔴 ${statusMeta("notprogressing").label} | ⚪ ${statusMeta("none").label} | 🔵 ${statusMeta("warmtransfer").label}`
       );
     }
     return lines.join("\n");
@@ -2881,7 +3157,7 @@ input[type="checkbox"]:checked::before{
     const obs=$("dailyObservations").value.trim();
     if(obs)blocks.push(`<br><div><strong>ADVISOR OBSERVATIONS</strong></div><div>${esc(obs).replace(/\n/g,"<br>")}</div>`);
     if(settings.includeLegend!==false){
-      blocks.push(`<br><div><strong>STATUS LEGEND — ANSWERED CALLS:</strong> 🟢 ${esc(statusMeta("applying").label)} &nbsp;|&nbsp; 🟡 ${esc(statusMeta("followup").label)} &nbsp;|&nbsp; 🔴 ${esc(statusMeta("notprogressing").label)} &nbsp;|&nbsp; ⚪ ${esc(statusMeta("none").label)}</div>`);
+      blocks.push(`<br><div><strong>STATUS LEGEND — ANSWERED CALLS:</strong> 🟢 ${esc(statusMeta("applying").label)} &nbsp;|&nbsp; 🟡 ${esc(statusMeta("followup").label)} &nbsp;|&nbsp; 🔴 ${esc(statusMeta("notprogressing").label)} &nbsp;|&nbsp; ⚪ ${esc(statusMeta("none").label)} &nbsp;|&nbsp; 🔵 ${esc(statusMeta("warmtransfer").label)}</div>`);
     }
     return `<div style="font-family:Arial,sans-serif;font-size:11pt;line-height:1.35">${blocks.join("")}</div>`;
   }
@@ -2891,13 +3167,15 @@ input[type="checkbox"]:checked::before{
     const f=settings.sfInclude||{};
     const lines=[];
     const push=(label,value)=>{if(String(value||"").trim())lines.push(`${label}: ${String(value).trim()}`);};
-    const intake=[$("intakeMonth").value.trim(),$("intakeYear").value.trim()].filter(Boolean).join(" ");
+    const depth=getCaptureDepth();
+    const intake=depth==="quick"?"":[$("intakeMonth").value.trim(),$("intakeYear").value.trim()].filter(Boolean).join(" ");
     if(f.name)push("Name",$("name").value);
-    if(f.country)push("Country / Market",({us:"U.S.",canada:"Canada",international:"International"})[$("market").value]||"");
-    if(f.location)push(locationFieldLabel($("market").value),$("location").value);
+    if(f.country)push("Location",locationCountryValue());
+    if(f.location && $("market").value!=="international")push(locationFieldLabel($("market").value),$("location").value);
+    if($("citizenship").value.trim())push("Citizenship",$("citizenship").value);
     if(f.leadSource)push("Lead Source",$("leadSource").value);
-    if(f.program)push("Program of Interest",$("program").value);
-    if(f.intake)push("Intended Intake",intake);
+    if(f.program && depth!=="quick")push("Program of Interest",$("program").value);
+    if(f.intake && depth!=="quick" && intake)push("Intended Intake",intake);
     if(f.outcome){
       push("Call Outcome",outcomeLabel($("callOutcome").value));
       if($("callOutcome").value==="answered")push("Status",statusMeta($("status").value).label);
@@ -3064,6 +3342,7 @@ input[type="checkbox"]:checked::before{
       if(status==="applying") return [0.16,0.67,0.37];
       if(status==="followup") return [0.86,0.63,0.12];
       if(status==="notprogressing") return [0.84,0.22,0.29];
+      if(status==="warmtransfer") return [0.18,0.44,0.68];
       return [0.52,0.57,0.62];
     };
     const drawStatusDot=(x,yy,rgb)=>{
@@ -3122,7 +3401,8 @@ input[type="checkbox"]:checked::before{
         ["applying",statusMeta("applying").label],
         ["followup",statusMeta("followup").label],
         ["notprogressing",statusMeta("notprogressing").label],
-        ["none",statusMeta("none").label]
+        ["none",statusMeta("none").label],
+        ["warmtransfer",statusMeta("warmtransfer").label]
       ].forEach(([status,label])=>{
         drawStatusDot(lx,y-5,statusRgb(status));
         textAt(label,lx+10,y,8.5,"F1",[0.12,0.18,0.27]);
@@ -3334,7 +3614,11 @@ input[type="checkbox"]:checked::before{
       else el.value=value??'';
     }
     $("recordId").value=draft.recordId||'';
-    $("market").value=f.market||'';updateLocationField();$("location").value=f.location||'';
+    $("market").value=f.market||marketForRecord(f);
+    updateLocationField();
+    $("location").value=(f.market==="international" && f.country)?f.country:(f.location||"");
+    $("citizenship").value=f.citizenship||"";
+    setCitizenshipVisible(Boolean(f.citizenship));
     $("isCalendly").checked=Boolean(draft.header?.isCalendly);
     $("isSQL").checked=Boolean(draft.header?.isSQL);
     $("isPDC").checked=Boolean(draft.header?.isPDC);
@@ -3512,10 +3796,19 @@ input[type="checkbox"]:checked::before{
       saveSettings();renderReport();
     });
     $("market").addEventListener("change",function(){
-      $("location").value="";
-      updateLocationField();
+      updateLocationField({clearIfCountryTypeChanged:true});
       updateTimezoneOverrideHint();
       updateTaskSubject();
+      enableSaveForNextCall();setDirty(true);persistDraft();
+    });
+    $("toggleCitizenshipBtn").addEventListener("click",()=>{
+      setCitizenshipVisible(true,{focus:true});
+      enableSaveForNextCall();setDirty(true);persistDraft();
+    });
+    $("removeCitizenshipBtn").addEventListener("click",()=>{
+      $("citizenship").value="";
+      setCitizenshipVisible(false);
+      enableSaveForNextCall();setDirty(true);persistDraft();
     });
     $("callOutcome").addEventListener("change",function(){
       updateStatusAvailability();
@@ -3568,7 +3861,7 @@ input[type="checkbox"]:checked::before{
     $("reportPreview").addEventListener("toggle",()=>{
       if($("reportPreview").open)$("report").scrollTop=0;
     });
-    ["currentCallNumber","taskTimezoneOverride","taskTimezoneDate","taskNote","intakeMonth","intakeYear","location"].forEach(id=>{
+    ["currentCallNumber","taskTimezoneOverride","taskTimezoneDate","taskNote","intakeMonth","intakeYear","market","location"].forEach(id=>{
       const el=$(id); if(!el) return;
       ["input","change"].forEach(evt=>el.addEventListener(evt,()=>{updateTimezoneOverrideHint();updateTaskSubject();}));
     });
