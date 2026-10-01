@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Advisor Intake & Daily Report Log Lite — v1.4.3</title>
+<title>Advisor Intake & Daily Report Log Lite — v1.4.4</title>
 <style>
 :root{
   --brand:#326295;
@@ -1296,6 +1296,14 @@ body.dark .capture-mode-switch button.active:hover{
   color:color-mix(in srgb,var(--brand) 30%,#fff)!important;
 }
 
+
+/* v1.4.4 — PDC-specific status semantics */
+.pdc-legend-title{
+  margin-left:6px;
+  padding-left:10px;
+  border-left:1px solid var(--border)
+}
+
 </style>
   <!-- GoatCounter usage analytics -->
   <script data-goatcounter="https://hrashid-saba.goatcounter.com/count"
@@ -1308,7 +1316,7 @@ body.dark .capture-mode-switch button.active:hover{
       <span id="advisorFirstName">Advisor</span>
     </div>
     <div class="brand-copy">
-      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.4.3</span></h1>
+      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.4.4</span></h1>
       <p>Simple same-day intake and manager-ready reporting.</p>
       <span id="advisorDisplay" class="sr-only">Advisor</span>
     </div>
@@ -2202,7 +2210,9 @@ body.dark .capture-mode-switch button.active:hover{
     // PDC now reports as Follow-Up; never silently exclude it.
     $("dailyReview").disabled=false;
     if(changed==="pdc" && pdc.checked)$("dailyReview").checked=true;
+    populateStatusDropdown($("status")?.value || "");
     updateOutcomeOptions();
+    updateStatusAvailability();
   }
   function updateOutcomeOptions(){
     const calendly=$("isCalendly");
@@ -2252,7 +2262,12 @@ body.dark .capture-mode-switch button.active:hover{
       followup:{label:labels.followup || "Nurturing",dot:"yellow",badge:"badge-yellow",icon:"🟡"},
       notprogressing:{label:labels.notprogressing || "Not Progressing",dot:"red",badge:"badge-red",icon:"🔴"},
       none:{label:labels.none || "None / Unclear",dot:"gray",badge:"badge-gray",icon:"⚪"},
-      warmtransfer:{label:"Warm Transfer",dot:"blue",badge:"badge-blue",icon:"🔵"}
+      warmtransfer:{label:"Warm Transfer",dot:"blue",badge:"badge-blue",icon:"🔵"},
+      pdc_paid:{label:"Deposit Paid / Confirmed",dot:"green",badge:"badge-green",icon:"🟢"},
+      pdc_pay_soon:{label:"Will Pay Soon / Intends to Pay",dot:"green",badge:"badge-green",icon:"🟢"},
+      pdc_considering:{label:"Considering / Not Yet Decided",dot:"yellow",badge:"badge-yellow",icon:"🟡"},
+      pdc_more_time:{label:"Needs More Time / Extension Requested",dot:"yellow",badge:"badge-yellow",icon:"🟡"},
+      pdc_declined:{label:"Declined / No Longer Accepting Offer",dot:"red",badge:"badge-red",icon:"🔴"}
     };
     return map[value] || map.none;
   }
@@ -2447,7 +2462,14 @@ body.dark .capture-mode-switch button.active:hover{
 
   function populateStatusDropdown(selectedValue){
     const current = selectedValue !== undefined ? selectedValue : ($("status").value || "");
-    const options = [
+    const isPdc=Boolean($("isPDC")?.checked);
+    const options = isPdc ? [
+      ["pdc_paid", statusMeta("pdc_paid").label],
+      ["pdc_pay_soon", statusMeta("pdc_pay_soon").label],
+      ["pdc_considering", statusMeta("pdc_considering").label],
+      ["pdc_more_time", statusMeta("pdc_more_time").label],
+      ["pdc_declined", statusMeta("pdc_declined").label]
+    ] : [
       ["applying", statusMeta("applying").label],
       ["followup", statusMeta("followup").label],
       ["notprogressing", statusMeta("notprogressing").label],
@@ -2976,6 +2998,7 @@ body.dark .capture-mode-switch button.active:hover{
     if(r.leadSource)parts.push({text:r.leadSource,kind:"source"});
     const intake=intakeDisplay(r);
     if(intake)parts.push({text:intake,kind:"intake"});
+    if(r.isPDC)parts.push({text:"(PDC)",kind:"pdc"});
     if(settings.reportIncludeProgram && r.program){
       const short=reportProgramAbbreviation(r.program);
       if(short)parts.push({text:`(${short})`,kind:"program"});
@@ -3057,11 +3080,21 @@ body.dark .capture-mode-switch button.active:hover{
       ${observations?`<h4 style="margin-top:12px">Advisor Observations</h4><div class="metrics"><div>${esc(observations).replace(/\n/g,"<br>")}</div></div>`:""}`;
 
     const inlineLegend=$("reportLegendInline");
-    inlineLegend.innerHTML=[
+    const hasPdc=all.some(r=>r.isPDC);
+    const legendItems=[
       `<span class="legend-title">STATUS LEGEND — ANSWERED CALLS</span>`,
       ...[["green","applying"],["yellow","followup"],["red","notprogressing"],["gray","none"],["blue","warmtransfer"]]
         .map(([tone,key])=>`<span class="legend-item"><span class="dot ${tone}" aria-hidden="true"></span>${esc(statusMeta(key).label)}</span>`)
-    ].join("");
+    ];
+    if(hasPdc){
+      legendItems.push(
+        `<span class="legend-title pdc-legend-title">PDC</span>`,
+        `<span class="legend-item"><span class="dot green"></span>Paid / Will Pay Soon</span>`,
+        `<span class="legend-item"><span class="dot yellow"></span>Considering / Needs More Time</span>`,
+        `<span class="legend-item"><span class="dot red"></span>Declined</span>`
+      );
+    }
+    inlineLegend.innerHTML=legendItems.join("");
     $("includeLegendQuick").checked=settings.includeLegend!==false;
     $("report").scrollTop=0;
   }
@@ -3112,6 +3145,9 @@ body.dark .capture-mode-switch button.active:hover{
       lines.push("",
         `STATUS LEGEND — ANSWERED CALLS: 🟢 ${statusMeta("applying").label} | 🟡 ${statusMeta("followup").label} | 🔴 ${statusMeta("notprogressing").label} | ⚪ ${statusMeta("none").label} | 🔵 ${statusMeta("warmtransfer").label}`
       );
+      if(all.some(r=>r.isPDC)){
+        lines.push(`PDC: 🟢 Paid / Will Pay Soon | 🟡 Considering / Needs More Time | 🔴 Declined`);
+      }
     }
     return lines.join("\n");
   }
@@ -3158,6 +3194,9 @@ body.dark .capture-mode-switch button.active:hover{
     if(obs)blocks.push(`<br><div><strong>ADVISOR OBSERVATIONS</strong></div><div>${esc(obs).replace(/\n/g,"<br>")}</div>`);
     if(settings.includeLegend!==false){
       blocks.push(`<br><div><strong>STATUS LEGEND — ANSWERED CALLS:</strong> 🟢 ${esc(statusMeta("applying").label)} &nbsp;|&nbsp; 🟡 ${esc(statusMeta("followup").label)} &nbsp;|&nbsp; 🔴 ${esc(statusMeta("notprogressing").label)} &nbsp;|&nbsp; ⚪ ${esc(statusMeta("none").label)} &nbsp;|&nbsp; 🔵 ${esc(statusMeta("warmtransfer").label)}</div>`);
+      if(all.some(r=>r.isPDC)){
+        blocks.push(`<div><strong>PDC:</strong> 🟢 Paid / Will Pay Soon &nbsp;|&nbsp; 🟡 Considering / Needs More Time &nbsp;|&nbsp; 🔴 Declined</div>`);
+      }
     }
     return `<div style="font-family:Arial,sans-serif;font-size:11pt;line-height:1.35">${blocks.join("")}</div>`;
   }
@@ -3339,9 +3378,9 @@ body.dark .capture-mode-switch button.active:hover{
       });
     };
     const statusRgb=(status)=>{
-      if(status==="applying") return [0.16,0.67,0.37];
-      if(status==="followup") return [0.86,0.63,0.12];
-      if(status==="notprogressing") return [0.84,0.22,0.29];
+      if(["applying","pdc_paid","pdc_pay_soon"].includes(status)) return [0.16,0.67,0.37];
+      if(["followup","pdc_considering","pdc_more_time"].includes(status)) return [0.86,0.63,0.12];
+      if(["notprogressing","pdc_declined"].includes(status)) return [0.84,0.22,0.29];
       if(status==="warmtransfer") return [0.18,0.44,0.68];
       return [0.52,0.57,0.62];
     };
@@ -3358,6 +3397,7 @@ body.dark .capture-mode-switch button.active:hover{
         const meta=[r.name||"Unnamed contact"];
         if(src)meta.push(src);
         if(intake)meta.push(intake);
+        if(r.isPDC)meta.push("(PDC)");
         if(settings.reportIncludeProgram && r.program)meta.push(`(${reportProgramAbbreviation(r.program)})`);
         const compact=`${meta.join(" - ")}${r.isSQL?" [SQL]":""} - ${summaryForRecord(r)}${r.nextSteps?` Next: ${r.nextSteps}`:""}`;
         const compactLines=wrapText(compact,92);
@@ -3409,6 +3449,11 @@ body.dark .capture-mode-switch button.active:hover{
         lx+=label.length*4.15+23;
       });
       y-=15;
+      if(all.some(r=>r.isPDC)){
+        ensure(16);
+        textAt("PDC: Green = Paid / Will Pay Soon | Yellow = Considering / Needs More Time | Red = Declined",margin,y,7.9,"F1",[0.12,0.18,0.27]);
+        y-=13;
+      }
     }
 
     if(ops.length) pages.push(ops.join("\n"));
