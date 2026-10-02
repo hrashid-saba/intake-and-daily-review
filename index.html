@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Advisor Intake & Daily Report Log Lite — v1.4.4</title>
+<title>Advisor Intake & Daily Report Log Lite — v1.4.5</title>
 <style>
 :root{
   --brand:#326295;
@@ -1316,7 +1316,7 @@ body.dark .capture-mode-switch button.active:hover{
       <span id="advisorFirstName">Advisor</span>
     </div>
     <div class="brand-copy">
-      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.4.4</span></h1>
+      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.4.5</span></h1>
       <p>Simple same-day intake and manager-ready reporting.</p>
       <span id="advisorDisplay" class="sr-only">Advisor</span>
     </div>
@@ -1815,8 +1815,8 @@ body.dark .capture-mode-switch button.active:hover{
           <div class="grid g2">
             <div class="field"><label for="statusGreenLabel"><span class="dot green" style="display:inline-block;margin-right:6px"></span>Green status</label><input id="statusGreenLabel" readonly aria-readonly="true" /></div>
             <div class="field"><label for="statusYellowLabel"><span class="dot yellow" style="display:inline-block;margin-right:6px"></span>Yellow status</label><input id="statusYellowLabel" readonly aria-readonly="true" /></div>
-            <div class="field"><label for="statusRedLabel"><span class="dot red" style="display:inline-block;margin-right:6px"></span>Red status</label><input id="statusRedLabel" readonly aria-readonly="true" /></div>
-            <div class="field"><label for="statusGrayLabel"><span class="dot gray" style="display:inline-block;margin-right:6px"></span>Gray status</label><input id="statusGrayLabel" readonly aria-readonly="true" /></div>
+            <div class="field"><label for="statusRedLabel"><span class="dot red" style="display:inline-block;margin-right:6px"></span>Red status — Not Progressing / DSQ</label><input id="statusRedLabel" readonly aria-readonly="true" /></div>
+            <div class="field"><label for="statusGrayLabel"><span class="dot gray" style="display:inline-block;margin-right:6px"></span>Gray status — Unclear / Warm Transfer</label><input id="statusGrayLabel" readonly aria-readonly="true" /></div>
           </div>
         </div>
       </details>
@@ -1945,8 +1945,8 @@ body.dark .capture-mode-switch button.active:hover{
     statusLabels:{
       applying:"Applying / Likely Applying",
       followup:"Nurturing",
-      notprogressing:"Not Progressing",
-      none:"None / Unclear"
+      notprogressing:"Not Progressing / DSQ",
+      none:"Unclear / Warm Transfer"
     },
     includeLegend:true,
     reportIncludeProgram:false,
@@ -2044,7 +2044,7 @@ body.dark .capture-mode-switch button.active:hover{
       const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
       settings = Object.assign(settings, savedSettings || {});
       settings.statusLabels=Object.assign({
-        applying:"Applying / Likely Applying",followup:"Nurturing",notprogressing:"Not Progressing",none:"None / Unclear"
+        applying:"Applying / Likely Applying",followup:"Nurturing",notprogressing:"Not Progressing / DSQ",none:"Unclear / Warm Transfer"
       },savedSettings.statusLabels||{});
       if(typeof settings.includeLegend !== "boolean") settings.includeLegend = true;
       if(typeof settings.reportIncludeProgram !== "boolean") settings.reportIncludeProgram = false;
@@ -2240,10 +2240,18 @@ body.dark .capture-mode-switch button.active:hover{
     const summaryMark=$("summaryRequiredMark");
     const nextMark=$("nextStepsRequiredMark");
 
-    if(summary) summary.required=answered && getCaptureDepth()!=="quick";
-    if(nextSteps) nextSteps.required=answered && getCaptureDepth()!=="quick";
-    if(summaryMark) summaryMark.style.display=answered && getCaptureDepth()!=="quick" ? "inline" : "none";
-    if(nextMark) nextMark.style.display=answered && getCaptureDepth()!=="quick" ? "inline" : "none";
+    const standardNotProgressing = answered && !$("isPDC")?.checked && status.value==="notprogressing";
+    const requireConversation = answered && getCaptureDepth()!=="quick";
+    const requireNextSteps = requireConversation && !standardNotProgressing;
+    if(summary) summary.required=requireConversation;
+    if(nextSteps) nextSteps.required=requireNextSteps;
+    if(summaryMark) summaryMark.style.display=requireConversation ? "inline" : "none";
+    if(nextMark) nextMark.style.display=requireNextSteps ? "inline" : "none";
+    if($("conversationHelp") && getCaptureDepth()!=="quick"){
+      $("conversationHelp").textContent=standardNotProgressing
+        ? "Call Summary / Notes is required. Next Steps is optional for Not Progressing / DSQ."
+        : "Call Summary / Notes and Next Steps are required only when Call Outcome is Answered.";
+    }
 
     if(!answered){
       status.value="";
@@ -2260,9 +2268,10 @@ body.dark .capture-mode-switch button.active:hover{
     const map = {
       applying:{label:labels.applying || "Applying / Likely Applying",dot:"green",badge:"badge-green",icon:"🟢"},
       followup:{label:labels.followup || "Nurturing",dot:"yellow",badge:"badge-yellow",icon:"🟡"},
-      notprogressing:{label:labels.notprogressing || "Not Progressing",dot:"red",badge:"badge-red",icon:"🔴"},
-      none:{label:labels.none || "None / Unclear",dot:"gray",badge:"badge-gray",icon:"⚪"},
-      warmtransfer:{label:"Warm Transfer",dot:"blue",badge:"badge-blue",icon:"🔵"},
+      notprogressing:{label:labels.notprogressing || "Not Progressing / DSQ",dot:"red",badge:"badge-red",icon:"🔴"},
+      none:{label:labels.none || "Unclear / Warm Transfer",dot:"gray",badge:"badge-gray",icon:"⚪"},
+      // Legacy Warm Transfer records are intentionally rendered as the merged gray status.
+      warmtransfer:{label:labels.none || "Unclear / Warm Transfer",dot:"gray",badge:"badge-gray",icon:"⚪"},
       pdc_paid:{label:"Deposit Paid / Confirmed",dot:"green",badge:"badge-green",icon:"🟢"},
       pdc_pay_soon:{label:"Will Pay Soon / Intends to Pay",dot:"green",badge:"badge-green",icon:"🟢"},
       pdc_considering:{label:"Considering / Not Yet Decided",dot:"yellow",badge:"badge-yellow",icon:"🟡"},
@@ -2461,7 +2470,8 @@ body.dark .capture-mode-switch button.active:hover{
   }
 
   function populateStatusDropdown(selectedValue){
-    const current = selectedValue !== undefined ? selectedValue : ($("status").value || "");
+    const rawCurrent = selectedValue !== undefined ? selectedValue : ($("status").value || "");
+    const current = rawCurrent==="warmtransfer" ? "none" : rawCurrent;
     const isPdc=Boolean($("isPDC")?.checked);
     const options = isPdc ? [
       ["pdc_paid", statusMeta("pdc_paid").label],
@@ -2473,8 +2483,7 @@ body.dark .capture-mode-switch button.active:hover{
       ["applying", statusMeta("applying").label],
       ["followup", statusMeta("followup").label],
       ["notprogressing", statusMeta("notprogressing").label],
-      ["none", statusMeta("none").label],
-      ["warmtransfer", statusMeta("warmtransfer").label]
+      ["none", statusMeta("none").label]
     ];
     $("status").innerHTML = `<option value="">Select status</option>` + options.map(([value,label])=>`<option value="${value}">${esc(label)}</option>`).join("");
     $("status").value = options.some(([value])=>value===current) ? current : "";
@@ -2746,7 +2755,8 @@ body.dark .capture-mode-switch button.active:hover{
     if(answered && depth!=="quick" && !currentCombinedSummary()){
       return saveError("add Call Summary / Notes",$("summary"));
     }
-    if(answered && depth!=="quick" && !$("nextSteps").value.trim()){
+    const nextStepsOptional = answered && depth!=="quick" && !$("isPDC").checked && $("status").value==="notprogressing";
+    if(answered && depth!=="quick" && !nextStepsOptional && !$("nextSteps").value.trim()){
       return saveError("add Next Steps",$("nextSteps"));
     }
     if(!answered) $("status").value="";
@@ -2858,7 +2868,8 @@ body.dark .capture-mode-switch button.active:hover{
     $("callOutcome").value=r.callOutcome||"";
     populateStatusDropdown(r.status||"");
     updateStatusAvailability();
-    if(r.callOutcome==="answered" && r.status) $("status").value=r.status;
+    if(r.callOutcome==="answered" && r.status) $("status").value=(r.status==="warmtransfer"?"none":r.status);
+    updateStatusAvailability();
     $("summary").value=r.summary||"";
     $("includeProfileDetails").checked=Boolean(r.includeProfileDetails);
     $("generatedProfile").value=r.generatedProfile||"";
@@ -3083,7 +3094,7 @@ body.dark .capture-mode-switch button.active:hover{
     const hasPdc=all.some(r=>r.isPDC);
     const legendItems=[
       `<span class="legend-title">STATUS LEGEND — ANSWERED CALLS</span>`,
-      ...[["green","applying"],["yellow","followup"],["red","notprogressing"],["gray","none"],["blue","warmtransfer"]]
+      ...[["green","applying"],["yellow","followup"],["red","notprogressing"],["gray","none"]]
         .map(([tone,key])=>`<span class="legend-item"><span class="dot ${tone}" aria-hidden="true"></span>${esc(statusMeta(key).label)}</span>`)
     ];
     if(hasPdc){
@@ -3143,7 +3154,7 @@ body.dark .capture-mode-switch button.active:hover{
 
     if(settings.includeLegend!==false){
       lines.push("",
-        `STATUS LEGEND — ANSWERED CALLS: 🟢 ${statusMeta("applying").label} | 🟡 ${statusMeta("followup").label} | 🔴 ${statusMeta("notprogressing").label} | ⚪ ${statusMeta("none").label} | 🔵 ${statusMeta("warmtransfer").label}`
+        `STATUS LEGEND — ANSWERED CALLS: 🟢 ${statusMeta("applying").label} | 🟡 ${statusMeta("followup").label} | 🔴 ${statusMeta("notprogressing").label} | ⚪ ${statusMeta("none").label}`
       );
       if(all.some(r=>r.isPDC)){
         lines.push(`PDC: 🟢 Paid / Will Pay Soon | 🟡 Considering / Needs More Time | 🔴 Declined`);
@@ -3193,7 +3204,7 @@ body.dark .capture-mode-switch button.active:hover{
     const obs=$("dailyObservations").value.trim();
     if(obs)blocks.push(`<br><div><strong>ADVISOR OBSERVATIONS</strong></div><div>${esc(obs).replace(/\n/g,"<br>")}</div>`);
     if(settings.includeLegend!==false){
-      blocks.push(`<br><div><strong>STATUS LEGEND — ANSWERED CALLS:</strong> 🟢 ${esc(statusMeta("applying").label)} &nbsp;|&nbsp; 🟡 ${esc(statusMeta("followup").label)} &nbsp;|&nbsp; 🔴 ${esc(statusMeta("notprogressing").label)} &nbsp;|&nbsp; ⚪ ${esc(statusMeta("none").label)} &nbsp;|&nbsp; 🔵 ${esc(statusMeta("warmtransfer").label)}</div>`);
+      blocks.push(`<br><div><strong>STATUS LEGEND — ANSWERED CALLS:</strong> 🟢 ${esc(statusMeta("applying").label)} &nbsp;|&nbsp; 🟡 ${esc(statusMeta("followup").label)} &nbsp;|&nbsp; 🔴 ${esc(statusMeta("notprogressing").label)} &nbsp;|&nbsp; ⚪ ${esc(statusMeta("none").label)}</div>`);
       if(all.some(r=>r.isPDC)){
         blocks.push(`<div><strong>PDC:</strong> 🟢 Paid / Will Pay Soon &nbsp;|&nbsp; 🟡 Considering / Needs More Time &nbsp;|&nbsp; 🔴 Declined</div>`);
       }
@@ -3441,8 +3452,7 @@ body.dark .capture-mode-switch button.active:hover{
         ["applying",statusMeta("applying").label],
         ["followup",statusMeta("followup").label],
         ["notprogressing",statusMeta("notprogressing").label],
-        ["none",statusMeta("none").label],
-        ["warmtransfer",statusMeta("warmtransfer").label]
+        ["none",statusMeta("none").label]
       ].forEach(([status,label])=>{
         drawStatusDot(lx,y-5,statusRgb(status));
         textAt(label,lx+10,y,8.5,"F1",[0.12,0.18,0.27]);
@@ -3572,8 +3582,8 @@ body.dark .capture-mode-switch button.active:hover{
     $("advisorName").value=settings.advisorName||"";
     $("statusGreenLabel").value=(settings.statusLabels&&settings.statusLabels.applying)||"Applying / Likely Applying";
     $("statusYellowLabel").value=(settings.statusLabels&&settings.statusLabels.followup)||"Nurturing";
-    $("statusRedLabel").value=(settings.statusLabels&&settings.statusLabels.notprogressing)||"Not Progressing";
-    $("statusGrayLabel").value=(settings.statusLabels&&settings.statusLabels.none)||"None / Unclear";
+    $("statusRedLabel").value=(settings.statusLabels&&settings.statusLabels.notprogressing)||"Not Progressing / DSQ";
+    $("statusGrayLabel").value=(settings.statusLabels&&settings.statusLabels.none)||"Unclear / Warm Transfer";
     ["statusGreenLabel","statusYellowLabel","statusRedLabel","statusGrayLabel"].forEach(id=>{$(id).readOnly=true;$(id).setAttribute("aria-readonly","true")});
     if($("toggleStatusLockBtn")) $("toggleStatusLockBtn").textContent="Unlock editing";
     $("reportIncludeProgramSetting").checked = settings.reportIncludeProgram === true;
@@ -3670,7 +3680,7 @@ body.dark .capture-mode-switch button.active:hover{
     setMode(draft.header?.isPDC?'followup':draft.category||'new');
     setCaptureDepth(draft.depth||'quick',{preserveOutcome:true});
     $("callOutcome").value=draft.header?.callOutcome||'';
-    populateStatusDropdown(draft.header?.status||'');updateStatusAvailability();
+    populateStatusDropdown(draft.header?.status||'');if(draft.header?.status==="warmtransfer")$("status").value="none";updateStatusAvailability();
     setPrereqAssessment(draft.prereqAssessment||'unassessed',draft.missing||[]);
     if(Array.isArray(draft.academicEntries)||Array.isArray(draft.mcatScores)){
       restoreAcademicLists(draft.academicEntries||[],draft.mcatScores||[]);
@@ -3840,6 +3850,13 @@ body.dark .capture-mode-switch button.active:hover{
       $("includeLegendSetting").checked=settings.includeLegend;
       saveSettings();renderReport();
     });
+    $("status").addEventListener("change",function(){
+      updateStatusAvailability();
+      enableSaveForNextCall();
+      setDirty(true);
+      persistDraft();
+    });
+
     $("market").addEventListener("change",function(){
       updateLocationField({clearIfCountryTypeChanged:true});
       updateTimezoneOverrideHint();
@@ -4019,8 +4036,8 @@ body.dark .capture-mode-switch button.active:hover{
       settings.statusLabels={
         applying:$("statusGreenLabel").value.trim()||"Applying / Likely Applying",
         followup:$("statusYellowLabel").value.trim()||"Nurturing",
-        notprogressing:$("statusRedLabel").value.trim()||"Not Progressing",
-        none:$("statusGrayLabel").value.trim()||"None / Unclear"
+        notprogressing:$("statusRedLabel").value.trim()||"Not Progressing / DSQ",
+        none:$("statusGrayLabel").value.trim()||"Unclear / Warm Transfer"
       };
       settings.reportIncludeProgram = $("reportIncludeProgramSetting").checked;
       settings.includeLegend = $("includeLegendSetting").checked;
