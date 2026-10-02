@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Advisor Intake & Daily Report Log Lite — v1.4.5</title>
+<title>Advisor Intake & Daily Report Log Lite — v1.4.6</title>
 <style>
 :root{
   --brand:#326295;
@@ -1316,7 +1316,7 @@ body.dark .capture-mode-switch button.active:hover{
       <span id="advisorFirstName">Advisor</span>
     </div>
     <div class="brand-copy">
-      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version">v1.4.5</span></h1>
+      <h1>Advisor Intake & Daily Report Log <span class="school-tag" id="schoolTag">Saba</span> <span class="app-version" title="Lite tool version — includes legacy status-label migration">v1.4.6</span></h1>
       <p>Simple same-day intake and manager-ready reporting.</p>
       <span id="advisorDisplay" class="sr-only">Advisor</span>
     </div>
@@ -2046,6 +2046,26 @@ body.dark .capture-mode-switch button.active:hover{
       settings.statusLabels=Object.assign({
         applying:"Applying / Likely Applying",followup:"Nurturing",notprogressing:"Not Progressing / DSQ",none:"Unclear / Warm Transfer"
       },savedSettings.statusLabels||{});
+
+      // v1.4.6 migration:
+      // Older GitHub-hosted builds may already have the previous *default* labels
+      // stored in localStorage. Update only those exact legacy defaults so genuine
+      // advisor customizations are never overwritten.
+      let statusLabelsMigrated=false;
+      if(settings.statusLabels.notprogressing==="Not Progressing"){
+        settings.statusLabels.notprogressing="Not Progressing / DSQ";
+        statusLabelsMigrated=true;
+      }
+      if(settings.statusLabels.none==="None / Unclear"){
+        settings.statusLabels.none="Unclear / Warm Transfer";
+        statusLabelsMigrated=true;
+      }
+      // A separate historical Warm Transfer value was never an editable setting,
+      // so no user-entered label needs to be migrated for that category.
+      if(statusLabelsMigrated){
+        localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
+      }
+
       if(typeof settings.includeLegend !== "boolean") settings.includeLegend = true;
       if(typeof settings.reportIncludeProgram !== "boolean") settings.reportIncludeProgram = false;
       if(typeof settings.reportPreviewDefaultOpen !== "boolean") settings.reportPreviewDefaultOpen = false;
